@@ -1,0 +1,10 @@
+# BetterResidence Configuration
+version: "1.0"
+
+# Language setting
+# Place language files in lang/ folder (e.g., lang/en-us.yml)
+lang: "zh-cn"
+
+# Message Color Theme
+# Refer to the theme set in lang/theme.yml
+theme: "default"

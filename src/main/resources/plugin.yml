@@ -1,0 +1,12 @@
+name: BetterResidence
+version: '${version}'
+main: cn.jason31416.betterresidence.BetterResidence
+api-version: '1.21'
+authors: [ Jason31416 ]
+depend: [ Vault ]
+softdepend: [ PlaceholderAPI ]
+commands:
+  betterresidence:
+    description: BetterResidence's main command.
+    aliases: [res, betterres, bres]
+    usage: /<command>
