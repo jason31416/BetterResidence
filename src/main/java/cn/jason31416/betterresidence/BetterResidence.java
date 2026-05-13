@@ -1,5 +1,6 @@
 package cn.jason31416.betterresidence;
 
+import cn.jason31416.betterresidence.claim.MaterialGroup;
 import cn.jason31416.planetlib.Required;
 import cn.jason31416.planetlib.message.MessageTheme;
 import cn.jason31416.planetlib.util.PluginLogger;
@@ -20,19 +21,25 @@ public final class BetterResidence extends JavaPlugin {
     public void onEnable() {
         instance = this;
         PlanetLib.initialize(this, Required.VAULT, Required.NBT, Required.PLACEHOLDERAPI);
-        Config.load(this);
+        try {
+            Config.load(this);
 
-        Util.saveFolder("lang");
-        Lang.init("lang/"+Config.getString("lang", "en-us")+".yml");
-        MessageTheme.loadThemesFromFile("lang/theme.yml");
-        MessageTheme.useTheme(Config.getString("theme", "default"));
+            Util.saveFolder("lang");
+            Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
+            MessageTheme.loadThemesFromFile("lang/theme.yml");
+            MessageTheme.useTheme(Config.getString("theme", "default"));
+            MaterialGroup.loadConfig();
 
-        PluginLogger.send(Lang.getMessage("console.loading"));
+            PluginLogger.send(Lang.getMessage("console.loading"));
 
-        DataHandler.init();
-        new BetterResidenceCommand().register();
+            DataHandler.init();
+            new BetterResidenceCommand().register();
 
-        PluginLogger.send(Lang.getMessage("console.loaded"));
+            PluginLogger.send(Lang.getMessage("console.loaded"));
+        }catch (Exception e){
+            PluginLogger.error("Found illegal config: "+e.getMessage());
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
 
     @Override

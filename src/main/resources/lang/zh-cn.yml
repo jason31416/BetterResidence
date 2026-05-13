@@ -4,9 +4,10 @@ command:
   no-permission: "<error-primary>错误: <error-content>您没有权限执行该命令"
   player-only: "<error-primary>错误: <error-content>该命令只能被玩家执行"
 
-
+material-group:
+  container: "容器"
 
 console:
-  loading: "正在初始化 BetterResidence..."
-  loaded: "成功加载了 BetterResidence"
-  disabled: "禁用了 BetterResidence"
+  loading: "[BetterResidence] 正在初始化 BetterResidence..."
+  loaded: "[BetterResidence] 成功加载了 BetterResidence"
+  disabled: "[BetterResidence] 禁用了 BetterResidence"

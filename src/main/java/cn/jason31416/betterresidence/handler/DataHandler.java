@@ -6,16 +6,10 @@ import cn.jason31416.planetlib.data.TableSchema;
 import cn.jason31416.planetlib.data.type.BooleanColumn;
 import cn.jason31416.planetlib.data.type.IntegerColumn;
 import cn.jason31416.planetlib.data.type.StringColumn;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DataHandler {
     @Getter
@@ -38,9 +32,20 @@ public class DataHandler {
                 .addColumn("claim_uuid", new StringColumn())
         );
         database.registerTable(new TableSchema("claim_permissions")
-                .addColumn("permission", new StringColumn()) // bukkit permission like permission nodes, e.g. block.break:oak or entity.kill:animals or block.interact (which is equiv to block.interact:all) or misc.teleport, etc.
+                .addColumn("permission", new StringColumn()) // bukkit permission like permission node keys, e.g. block.break:oak or entity.kill:animals or block.interact (which is equiv to block.interact:all) or misc.teleport, etc.
                 .addColumn("weight", new IntegerColumn()) // 0-1000, 1000 means applicable to everyone except owner, default is 900 (applicable to everyone except owner and trusted)
                 .addColumn("value", new BooleanColumn()) // allow or disallow
+                .addColumn("claim_uuid", new StringColumn())
+        );
+        database.registerTable(new TableSchema("group_weights") // Each residence can have multiple groups. This table will store all groups BESIDES the three default (0 everyone, 900 trusted, 1000 owner)
+                .addColumn("group_id", new StringColumn())
+                .addColumn("weight", new IntegerColumn())
+                .addColumn("group_name", new StringColumn())
+                .addColumn("claim_uuid", new StringColumn())
+        );
+        database.registerTable(new TableSchema("player_groups") // Each player can belong in a single group in the claim.
+                .addColumn("player_uuid", new BooleanColumn())
+                .addColumn("group_id", new StringColumn())
                 .addColumn("claim_uuid", new StringColumn())
         );
         // Non-player environmental settings such as weather, time, etc., all values can be string, integer, or bool, or even double or whatever they like
@@ -49,6 +54,7 @@ public class DataHandler {
                 .addColumn("value", new StringColumn())
                 .addColumn("claim_uuid", new StringColumn())
         );
+        database.initializeSchema();
     }
 
     public static void close() {
