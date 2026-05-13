@@ -5,3 +5,4 @@ default:
   muted: "<#CCCCCC>"
   error-primary: "<#CC1613>"
   error-content: "<#F85654>"
+  error-highlight: "<#F8D854>"

@@ -17,10 +17,10 @@ public record AreaBox(int minX, int maxX, int minY, int maxY, int minZ, int maxZ
 
     public boolean contains(SimpleLocation location) {
         SimpleLocation blockLocation = location.getBlockLocation();
-        int x = (int) blockLocation.x();
-        int y = (int) blockLocation.y();
-        int z = (int) blockLocation.z();
+        return containsBlock((int) blockLocation.x(), (int) blockLocation.y(), (int) blockLocation.z());
+    }
 
+    public boolean containsBlock(int x, int y, int z) {
         return minX <= x && maxX >= x
                 && minY <= y && maxY >= y
                 && minZ <= z && maxZ >= z;
