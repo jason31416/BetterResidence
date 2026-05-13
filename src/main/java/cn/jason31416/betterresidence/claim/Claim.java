@@ -1,8 +1,13 @@
 package cn.jason31416.betterresidence.claim;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
+import cn.jason31416.planetlib.data.Param;
 import cn.jason31416.planetlib.util.MapTree;
+import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
+import cn.jason31416.planetlib.wrapper.SimpleWorld;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.bukkit.Material;
@@ -10,8 +15,104 @@ import org.bukkit.Material;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class Claim {
+    // Static method/variables
+    private static final Cache<String, Claim> claimCache = CacheBuilder.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .build();
+    private static final Object areaCreateLock = new Object();
+
+    private record CachedArea(String world, AreaBox box, String claimUuid) {
+        private boolean contains(SimpleLocation location) {
+            return world.equals(location.world().getName()) && box.contains(location);
+        }
+    }
+
+    /**
+     * Fetch a claim by UUID, from cache or database. The returned object SHOULD NOT be stored persistently, as they are only the cached objects.
+     * Store the uuid instead, and fetch it from this function every time you need to use it.
+     * @param uuid The claim UUID
+     * @return The claim, or null if not found
+     */
+    @Nullable
+    @SneakyThrows
+    public static Claim fetchClaim(String uuid) {
+        return claimCache.get(uuid, () -> {
+            Optional<MapTree> row = DataHandler.getDatabase().select("claim")
+                    .keyEquals("uuid", uuid)
+                    .one();
+            if (row.isEmpty()) return null;
+            MapTree data = row.get();
+            SimplePlayer owner = SimplePlayer.of(UUID.fromString(data.getString("owner_uuid")));
+            return new Claim(owner, data.getString("name"), uuid, data.getString("parent_uuid", null));
+        });
+    }
+
+    /**
+     * Find the deepest claim containing a location. The initial area lookup uses SQLite R-tree bounds.
+     * @param location The location to query.
+     * @return The deepest matching claim, or null if no claim contains the location.
+     */
+    @Nullable
+    @SneakyThrows
+    public static Claim findClaimAt(SimpleLocation location) {
+        SimpleLocation blockLocation = location.getBlockLocation();
+        List<CachedArea> areas = DataHandler.getDatabase().getSqlInstance().executeQuery(
+                """
+                SELECT claim_areas.claim_uuid,
+                       claim_areas.world,
+                       area.minX,
+                       area.maxX,
+                       area.minY,
+                       area.maxY,
+                       area.minZ,
+                       area.maxZ
+                FROM area
+                JOIN claim_areas ON claim_areas.area_id = area.id
+                WHERE area.minX <= ?
+                  AND area.maxX >= ?
+                  AND area.minY <= ?
+                  AND area.maxY >= ?
+                  AND area.minZ <= ?
+                  AND area.maxZ >= ?
+                  AND claim_areas.world = ?
+                """,
+                List.of(
+                        Param.of((int) blockLocation.x()),
+                        Param.of((int) blockLocation.x()),
+                        Param.of((int) blockLocation.y()),
+                        Param.of((int) blockLocation.y()),
+                        Param.of((int) blockLocation.z()),
+                        Param.of((int) blockLocation.z()),
+                        Param.of(blockLocation.world().getName())
+                ),
+                rs -> new CachedArea(
+                        rs.getString("world"),
+                        new AreaBox(
+                                rs.getInt("minX"),
+                                rs.getInt("maxX"),
+                                rs.getInt("minY"),
+                                rs.getInt("maxY"),
+                                rs.getInt("minZ"),
+                                rs.getInt("maxZ")
+                        ),
+                        rs.getString("claim_uuid")
+                )
+        );
+        return deepestClaim(areas.stream().map(CachedArea::claimUuid).distinct().toList());
+    }
+
+    @Nullable
+    private static Claim deepestClaim(List<String> claimUuids) {
+        return claimUuids.stream()
+                .map(Claim::fetchClaim)
+                .filter(Objects::nonNull)
+                .max(Comparator.comparingInt(Claim::getDepth))
+                .orElse(null);
+    }
+
     // Basic attributes (Directly fetched from the table, stay in memory)
     @Getter
     private final SimplePlayer owner;
@@ -19,16 +120,104 @@ public class Claim {
     private final String name;
     @Getter
     private final String uuid;
+    @Getter
+    @Nullable
+    private final String parentUuid;
 
     private final Map<SimplePlayer, Integer> playerWeightCache = new ConcurrentHashMap<>();
 
     private List<PermissionNode> permissionNodes = null;
     private Map<String, String> claimFlags = null;
+    private List<String> subClaims = null;
 
-    public Claim(SimplePlayer owner, String name, String uuid) {
+    public Claim(SimplePlayer owner, String name, String uuid, @Nullable String parentUuid) {
         this.owner = owner;
         this.name = name;
         this.uuid = uuid;
+        this.parentUuid = parentUuid;
+    }
+
+    public int getDepth() {
+        int depth = 0;
+        Set<String> seenClaims = new HashSet<>();
+        Claim current = this;
+
+        while (current.parentUuid != null && seenClaims.add(current.uuid)) {
+            current = fetchClaim(current.parentUuid);
+            if (current == null) break;
+            depth++;
+        }
+
+        return depth;
+    }
+
+    /**
+     * Create a block-aligned area for this claim.
+     * @param world The world the area belongs to.
+     * @param areaBox Inclusive integer block bounds.
+     * @return The created area id.
+     */
+    @SneakyThrows
+    public int createArea(SimpleWorld world, AreaBox areaBox) {
+        return createArea(world.getName(), areaBox);
+    }
+
+    /**
+     * Create a block-aligned area for this claim.
+     * @param worldName The world name the area belongs to.
+     * @param areaBox Inclusive integer block bounds.
+     * @return The created area id.
+     */
+    @SneakyThrows
+    public int createArea(String worldName, AreaBox areaBox) {
+        synchronized (areaCreateLock) {
+            int areaId = DataHandler.getDatabase().getSqlInstance().executeQueryOne(
+                    "SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM area",
+                    List.of(),
+                    rs -> rs.getInt("next_id")
+            ).orElseThrow(() -> new IllegalStateException("Failed to allocate claim area id"));
+
+            DataHandler.getDatabase().getSqlInstance().executeUpdate(
+                    """
+                    INSERT INTO area(id, minX, maxX, minY, maxY, minZ, maxZ)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    List.of(
+                            Param.of(areaId),
+                            Param.of(areaBox.minX()),
+                            Param.of(areaBox.maxX()),
+                            Param.of(areaBox.minY()),
+                            Param.of(areaBox.maxY()),
+                            Param.of(areaBox.minZ()),
+                            Param.of(areaBox.maxZ())
+                    )
+            );
+
+            DataHandler.getDatabase().insert("claim_areas")
+                    .value("area_id", areaId)
+                    .value("claim_uuid", uuid)
+                    .value("world", worldName)
+                    .executeUpdate();
+
+            return areaId;
+        }
+    }
+
+    // --------- Subclaim ---------------
+
+    private void fetchSubclaims(){
+        subClaims = new ArrayList<>();
+        List<MapTree> rows = DataHandler.getDatabase().select("claim")
+                .keyEquals("parent_uuid", uuid)
+                .list();
+        for (MapTree row : rows) {
+            subClaims.add(row.getString("uuid"));
+        }
+    }
+
+    public List<String> getSubClaims() {
+        if (subClaims == null) fetchSubclaims();
+        return subClaims;
     }
 
     // --------- Flag system ------------

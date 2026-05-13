@@ -21,15 +21,17 @@ public class DataHandler {
 
         database = Database.createSqlite(dbFile);
 
-        database.getSqlInstance().execute("CREATE VIRTUAL TABLE IF NOT EXISTS area USING rtree(id, minX, maxX, minY, maxY, minZ, maxZ);", List.of());
+        database.getSqlInstance().execute("CREATE VIRTUAL TABLE IF NOT EXISTS area USING rtree_i32(id, minX, maxX, minY, maxY, minZ, maxZ);", List.of());
         database.registerTable(new TableSchema("claim")
                 .addColumn("uuid", new StringColumn().setPrimaryKey(true).setUnique(true))
                 .addColumn("name", new StringColumn())
                 .addColumn("owner_uuid", new StringColumn())
+                .addColumn("parent_uuid", new StringColumn())
         );
         database.registerTable(new TableSchema("claim_areas")
                 .addColumn("area_id", new IntegerColumn().setPrimaryKey(true).setUnique(true))
                 .addColumn("claim_uuid", new StringColumn())
+                .addColumn("world", new StringColumn())
         );
         database.registerTable(new TableSchema("claim_permissions")
                 .addColumn("permission", new StringColumn()) // bukkit permission like permission node keys, e.g. block.break:oak or entity.kill:animals or block.interact (which is equiv to block.interact:all) or misc.teleport, etc.
@@ -44,7 +46,7 @@ public class DataHandler {
                 .addColumn("claim_uuid", new StringColumn())
         );
         database.registerTable(new TableSchema("player_groups") // Each player can belong in a single group in the claim.
-                .addColumn("player_uuid", new BooleanColumn())
+                .addColumn("player_uuid", new StringColumn())
                 .addColumn("group_id", new StringColumn())
                 .addColumn("claim_uuid", new StringColumn())
         );
@@ -55,6 +57,9 @@ public class DataHandler {
                 .addColumn("claim_uuid", new StringColumn())
         );
         database.initializeSchema();
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_world_area ON claim_areas(world, area_id);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_claim_uuid ON claim_areas(claim_uuid);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_parent_uuid ON claim(parent_uuid);", List.of());
     }
 
     public static void close() {
