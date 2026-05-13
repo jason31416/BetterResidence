@@ -18,7 +18,7 @@ import java.util.Locale;
 public class ProtectionEventListener implements Listener {
     private void sendProhibitedMessage(SimplePlayer player, String missingPermission, @Nullable String material, String groupName){
         Lang.getMessage("claim.prohibited-action")
-                .add("permission", material==null?missingPermission:missingPermission+":"+material)
+                .add("permission", material==null?missingPermission:missingPermission+":"+material.toLowerCase(Locale.ROOT))
                 .add("group-name", groupName)
                 .sendActionbar(player);
     }

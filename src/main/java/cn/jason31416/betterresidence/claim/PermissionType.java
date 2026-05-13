@@ -24,9 +24,9 @@ public final class PermissionType {
         registry.add(this);
     }
 
-    public static PermissionType BLOCK_INTERACT = new PermissionType("BLOCK_INTERACT", true);
-    public static PermissionType BLOCK_BREAK = new PermissionType("BLOCK_BREAK", true);
-    public static PermissionType BLOCK_PLACE = new PermissionType("BLOCK_PLACE", true);
-    public static PermissionType ENTITY_DAMAGE = new PermissionType("ENTITY_DAMAGE", true);
-    public static PermissionType ENTITY_DESTROY = new PermissionType("ENTITY_DESTROY", true);
+    public static PermissionType BLOCK_INTERACT = new PermissionType("block.interact", true);
+    public static PermissionType BLOCK_BREAK = new PermissionType("block.break", true);
+    public static PermissionType BLOCK_PLACE = new PermissionType("block.place", true);
+    public static PermissionType ENTITY_DAMAGE = new PermissionType("entity.damage", true);
+    public static PermissionType ENTITY_INTERACT = new PermissionType("entity.interact", true);
 }

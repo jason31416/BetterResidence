@@ -1,8 +1,12 @@
 package cn.jason31416.betterresidence;
 
 import cn.jason31416.betterresidence.claim.MaterialGroup;
+import cn.jason31416.betterresidence.claim.AreaBox;
+import cn.jason31416.betterresidence.claim.Claim;
 import cn.jason31416.planetlib.Required;
 import cn.jason31416.planetlib.message.MessageTheme;
+import cn.jason31416.planetlib.wrapper.SimplePlayer;
+import cn.jason31416.planetlib.wrapper.SimpleWorld;
 import cn.jason31416.planetlib.util.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 import cn.jason31416.planetlib.PlanetLib;
@@ -14,6 +18,8 @@ import cn.jason31416.betterresidence.handler.ProtectionEventListener;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.util.Util;
 import lombok.Getter;
+
+import java.util.UUID;
 
 public final class BetterResidence extends JavaPlugin {
     @Getter
@@ -45,8 +51,27 @@ public final class BetterResidence extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        // todo: testing
-        
+        // todo: Test
+        createTestClaim();
+    }
+
+    private void createTestClaim() {
+        String name = "test-claim";
+        boolean exists = DataHandler.getDatabase().select("claim")
+                .keyEquals("name", name)
+                .one()
+                .isPresent();
+        if (exists) {
+            return;
+        }
+
+        Claim.createClaim(
+                SimplePlayer.of("testing"),
+                name,
+                null,
+                SimpleWorld.defaultWorld(),
+                new AreaBox(-5, 5, 50, 75, -5, 5)
+        );
     }
 
     @Override
