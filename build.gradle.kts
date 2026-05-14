@@ -8,13 +8,13 @@ group = "cn.jason31416"
 version = "1.0.0"
 
 repositories {
-    mavenLocal()
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    mavenLocal()
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     implementation("cn.jason31416:PlanetLib:1.4.1")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
@@ -31,6 +31,9 @@ tasks.withType<JavaCompile> {
 
 tasks.runServer {
     minecraftVersion("1.21.8")
+    doFirst {
+        delete(layout.projectDirectory.dir("run/plugins/BetterResidence"))
+    }
 }
 
 tasks.withType<ProcessResources> {

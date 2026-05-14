@@ -1,11 +1,25 @@
 # BetterResidence Chinese Language File
 
+# Color variables:
+# <content> normal content
+# <highlight> important variables, titles, name of the plugin, etc.
+# Error structure:
+# <error-primary>错误: <error-content>Actual message goes here, with <error-highlight>important details <error-content>here
+
 command:
   no-permission: "<error-primary>错误: <error-content>您没有权限执行该命令"
   player-only: "<error-primary>错误: <error-content>该命令只能被玩家执行"
+  reload-success: "<highlight>BetterResidence <content>已重新加载"
+  reload-failed: "<error-primary>错误: <error-content>BetterResidence 重新加载失败: <error-highlight>%error%"
 
 claim:
-  prohibited-action: "<error-highlight>%group-name% <error-content>没有权限 <muted>%permission%"
+  prohibited-action: "<error-highlight>%group-name% <error-content>没有权限 %permission%"
+  entered: "<content>已进入领地 <highlight>%claim%"
+  left: "<content>已离开领地 <highlight>%claim%"
+
+  action:
+    block:
+      break: "破坏 %material%"
 
   group:
     none: "访客"

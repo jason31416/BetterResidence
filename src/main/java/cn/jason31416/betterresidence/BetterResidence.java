@@ -30,13 +30,7 @@ public final class BetterResidence extends JavaPlugin {
         instance = this;
         PlanetLib.initialize(this, Required.VAULT, Required.NBT, Required.PLACEHOLDERAPI);
         try {
-            Config.load(this);
-
-            Util.saveFolder("lang");
-            Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
-            MessageTheme.loadThemesFromFile("lang/theme.yml");
-            MessageTheme.useTheme(Config.getString("theme", "default"));
-            MaterialGroup.loadConfig();
+            reloadPluginConfig();
 
             PluginLogger.send(Lang.getMessage("console.loading"));
 
@@ -72,6 +66,16 @@ public final class BetterResidence extends JavaPlugin {
                 SimpleWorld.defaultWorld(),
                 new AreaBox(-5, 5, 50, 75, -5, 5)
         );
+    }
+
+    public void reloadPluginConfig() {
+        Config.load(this);
+
+        Util.saveFolder("lang");
+        Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
+        MessageTheme.loadThemesFromFile("lang/theme.yml");
+        MessageTheme.useTheme(Config.getString("theme", "default"));
+        MaterialGroup.loadConfig();
     }
 
     @Override

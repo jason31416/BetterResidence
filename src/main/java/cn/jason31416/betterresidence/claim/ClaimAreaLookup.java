@@ -2,6 +2,7 @@ package cn.jason31416.betterresidence.claim;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.planetlib.data.Param;
+import cn.jason31416.planetlib.util.PluginLogger;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import lombok.SneakyThrows;
 
@@ -23,6 +24,11 @@ public final class ClaimAreaLookup {
     private ClaimAreaLookup() {
     }
 
+    /**
+     * The main API to look up the claim effective at certain location.
+     * @param location Any location in any world.
+     * @return The claim at the location, or null if not found.
+     */
     @Nullable
     public static Claim findClaimAt(SimpleLocation location) {
         SimpleLocation blockLocation = location.getBlockLocation();
@@ -31,15 +37,21 @@ public final class ClaimAreaLookup {
         int y = (int) blockLocation.y();
         int z = (int) blockLocation.z();
 
+//        long t = System.nanoTime();
+
         Claim cachedClaim = findCachedClaim(world, x, y, z);
         if (cachedClaim != null) {
+//            PluginLogger.info("cache hit at "+location.toString()+", took "+(System.nanoTime()-t));
             return cachedClaim;
         }
 
         IndexedArea matchingArea = findDeepestAreaAt(world, x, y, z);
         if (matchingArea == null) {
+//            PluginLogger.info("empty result at "+location.toString()+", took "+(System.nanoTime()-t));
             return null;
         }
+
+//        PluginLogger.info("cache miss at "+location.toString()+", took "+(System.nanoTime()-t));
 
         List<IndexedArea> directSubclaimAreas = fetchOverlappingDirectSubclaimAreas(matchingArea);
         addCacheEntry(new CacheEntry(matchingArea, directSubclaimAreas, System.currentTimeMillis()));

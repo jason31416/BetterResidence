@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BetterResidence Macaron Palettes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page-bg: #fbf8f3;
+      --card-bg: rgba(255, 255, 255, 0.82);
+      --ink: #3d4048;
+      --soft-ink: #777b86;
+      --line: rgba(99, 104, 118, 0.16);
+      --shadow: 0 20px 60px rgba(102, 106, 121, 0.13);
+      --radius: 26px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 10%, rgba(175, 211, 255, 0.42), transparent 28%),
+        radial-gradient(circle at 88% 5%, rgba(255, 200, 216, 0.42), transparent 26%),
+        radial-gradient(circle at 80% 86%, rgba(199, 235, 211, 0.46), transparent 30%),
+        var(--page-bg);
+    }
+
+    main {
+      width: min(1180px, calc(100% - 36px));
+      margin: 0 auto;
+      padding: 52px 0 64px;
+    }
+
+    header {
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.96;
+      letter-spacing: -0.06em;
+    }
+
+    .lead {
+      max-width: 780px;
+      margin: 0;
+      color: var(--soft-ink);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .palette {
+      position: relative;
+      overflow: hidden;
+      min-height: 292px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.68)),
+        var(--card-bg);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .palette::before {
+      position: absolute;
+      inset: -78px -82px auto auto;
+      width: 188px;
+      height: 188px;
+      border-radius: 999px;
+      background: var(--primary);
+      content: "";
+      opacity: 0.24;
+    }
+
+    .palette::after {
+      position: absolute;
+      inset: auto auto -72px -66px;
+      width: 166px;
+      height: 166px;
+      border-radius: 999px;
+      background: var(--highlight);
+      content: "";
+      opacity: 0.2;
+    }
+
+    .title-row,
+    .preview,
+    .swatches,
+    .tokens {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.035em;
+    }
+
+    .tag {
+      flex: 0 0 auto;
+      padding: 7px 11px;
+      border-radius: 999px;
+      color: color-mix(in srgb, var(--primary) 72%, #27303a);
+      background: color-mix(in srgb, var(--primary) 18%, #ffffff);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .preview {
+      display: flex;
+      align-items: center;
+      min-height: 76px;
+      margin-bottom: 22px;
+      padding: 18px 20px;
+      border: 1px solid color-mix(in srgb, var(--primary) 22%, rgba(100, 100, 100, 0.12));
+      border-radius: 19px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.56)),
+        color-mix(in srgb, var(--primary) 7%, #ffffff);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+      font-size: 18px;
+      font-weight: 650;
+      line-height: 1.7;
+    }
+
+    .preview .primary {
+      color: var(--primary);
+      font-weight: 850;
+    }
+
+    .preview .content {
+      color: var(--content);
+    }
+
+    .preview .highlight {
+      color: var(--highlight);
+      font-weight: 850;
+    }
+
+    .preview .muted {
+      color: var(--muted);
+      font-size: 0.92em;
+      font-weight: 600;
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .swatch {
+      min-height: 74px;
+      padding: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.68);
+      border-radius: 17px;
+      background: var(--color);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    .swatch span {
+      display: block;
+      color: rgba(40, 43, 50, 0.74);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .tokens {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px 14px;
+      color: var(--soft-ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .tokens b {
+      color: var(--ink);
+      font-weight: 750;
+    }
+
+    @media (max-width: 820px) {
+      main {
+        width: min(100% - 24px, 560px);
+        padding-top: 34px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .palette {
+        padding: 19px;
+      }
+
+      .preview {
+        font-size: 16px;
+      }
+
+      .swatches {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tokens {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>BetterResidence<br>Macaron Palettes</h1>
+      <p class="lead">多套适合插件提示文本的马卡龙主题配色。每张卡片都按 <code>&lt;primary&gt;BetterResidence &lt;content&gt;已重新加载 &lt;highlight&gt;配置文件 &lt;content&gt;! &lt;muted&gt;本命令为管理员命令</code> 的规则渲染。</p>
+    </header>
+
+    <section class="grid" aria-label="BetterResidence 配色方案">
+      <article class="palette" style="--primary: #a9d88d; --content: #7db7f0; --highlight: #7f8fb0; --muted: #a3a9b2;">
+        <div class="title-row">
+          <h2>蓝莓牛奶</h2>
+          <span class="tag">Blue Theme</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #7db7f0;"><span>primary</span></div>
+          <div class="swatch" style="--color: #64778e;"><span>content</span></div>
+          <div class="swatch" style="--color: #7f8fb0;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a3a9b2;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #7db7f0</div>
+          <div><b>content</b> #64778e</div>
+          <div><b>highlight</b> #7f8fb0</div>
+          <div><b>muted</b> #a3a9b2</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #86d8cf; --content: #657d83; --highlight: #72a4a9; --muted: #9fa8aa;">
+        <div class="title-row">
+          <h2>薄荷海盐</h2>
+          <span class="tag">Mint Blue</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #86d8cf;"><span>primary</span></div>
+          <div class="swatch" style="--color: #657d83;"><span>content</span></div>
+          <div class="swatch" style="--color: #72a4a9;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #9fa8aa;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #86d8cf</div>
+          <div><b>content</b> #657d83</div>
+          <div><b>highlight</b> #72a4a9</div>
+          <div><b>muted</b> #9fa8aa</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #f6a9be; --content: #816b76; --highlight: #b77c93; --muted: #aaa1a6;">
+        <div class="title-row">
+          <h2>樱花草莓</h2>
+          <span class="tag">Sakura Pink</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #f6a9be;"><span>primary</span></div>
+          <div class="swatch" style="--color: #816b76;"><span>content</span></div>
+          <div class="swatch" style="--color: #b77c93;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #aaa1a6;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #f6a9be</div>
+          <div><b>content</b> #816b76</div>
+          <div><b>highlight</b> #b77c93</div>
+          <div><b>muted</b> #aaa1a6</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #bda7ee; --content: #736f8e; --highlight: #8c82b7; --muted: #a6a3af;">
+        <div class="title-row">
+          <h2>奶油薰衣草</h2>
+          <span class="tag">Lavender</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #bda7ee;"><span>primary</span></div>
+          <div class="swatch" style="--color: #736f8e;"><span>content</span></div>
+          <div class="swatch" style="--color: #8c82b7;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a6a3af;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #bda7ee</div>
+          <div><b>content</b> #736f8e</div>
+          <div><b>highlight</b> #8c82b7</div>
+          <div><b>muted</b> #a6a3af</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #ffbd93; --content: #827163; --highlight: #b48b70; --muted: #aaa49e;">
+        <div class="title-row">
+          <h2>蜜桃杏仁</h2>
+          <span class="tag">Peach</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #ffbd93;"><span>primary</span></div>
+          <div class="swatch" style="--color: #827163;"><span>content</span></div>
+          <div class="swatch" style="--color: #b48b70;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #aaa49e;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #ffbd93</div>
+          <div><b>content</b> #827163</div>
+          <div><b>highlight</b> #b48b70</div>
+          <div><b>muted</b> #aaa49e</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #a9d88d; --content: #6d7d67; --highlight: #82a174; --muted: #a1a8a0;">
+        <div class="title-row">
+          <h2>抹茶奶盖</h2>
+          <span class="tag">Matcha</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #a9d88d;"><span>primary</span></div>
+          <div class="swatch" style="--color: #6d7d67;"><span>content</span></div>
+          <div class="swatch" style="--color: #82a174;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a1a8a0;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #a9d88d</div>
+          <div><b>content</b> #6d7d67</div>
+          <div><b>highlight</b> #82a174</div>
+          <div><b>muted</b> #a1a8a0</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #9fc9ff; --content: #657489; --highlight: #7d93bd; --muted: #a6abb4;">
+        <div class="title-row">
+          <h2>云朵苏打</h2>
+          <span class="tag">Soft Blue</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #9fc9ff;"><span>primary</span></div>
+          <div class="swatch" style="--color: #657489;"><span>content</span></div>
+          <div class="swatch" style="--color: #7d93bd;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a6abb4;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #9fc9ff</div>
+          <div><b>content</b> #657489</div>
+          <div><b>highlight</b> #7d93bd</div>
+          <div><b>muted</b> #a6abb4</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #f4d27f; --content: #817760; --highlight: #a99667; --muted: #aaa69d;">
+        <div class="title-row">
+          <h2>香草布丁</h2>
+          <span class="tag">Vanilla</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #f4d27f;"><span>primary</span></div>
+          <div class="swatch" style="--color: #817760;"><span>content</span></div>
+          <div class="swatch" style="--color: #a99667;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #aaa69d;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #f4d27f</div>
+          <div><b>content</b> #817760</div>
+          <div><b>highlight</b> #a99667</div>
+          <div><b>muted</b> #aaa69d</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #bda7ee; --content: #8fc7f7; --highlight: #79aeea; --muted: #a5a9b3;">
+        <div class="title-row">
+          <h2>蓝莓薰衣草</h2>
+          <span class="tag">Blue / Purple</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #bda7ee;"><span>primary</span></div>
+          <div class="swatch" style="--color: #8fc7f7;"><span>content</span></div>
+          <div class="swatch" style="--color: #79aeea;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a5a9b3;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #bda7ee</div>
+          <div><b>content</b> #8fc7f7</div>
+          <div><b>highlight</b> #79aeea</div>
+          <div><b>muted</b> #a5a9b3</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #86d8cf; --content: #8fc7f7; --highlight: #79b6e8; --muted: #9fa8aa;">
+        <div class="title-row">
+          <h2>蓝薄荷海盐</h2>
+          <span class="tag">Mint / Blue</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #86d8cf;"><span>primary</span></div>
+          <div class="swatch" style="--color: #8fc7f7;"><span>content</span></div>
+          <div class="swatch" style="--color: #79b6e8;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #9fa8aa;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #86d8cf</div>
+          <div><b>content</b> #8fc7f7</div>
+          <div><b>highlight</b> #79b6e8</div>
+          <div><b>muted</b> #9fa8aa</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #8edbd0; --content: #6f7d65; --highlight: #8fa476; --muted: #a1aaa7;">
+        <div class="title-row">
+          <h2>薄荷抹茶</h2>
+          <span class="tag">Mint / Matcha</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #8edbd0;"><span>primary</span></div>
+          <div class="swatch" style="--color: #6f7d65;"><span>content</span></div>
+          <div class="swatch" style="--color: #8fa476;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a1aaa7;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #8edbd0</div>
+          <div><b>content</b> #6f7d65</div>
+          <div><b>highlight</b> #8fa476</div>
+          <div><b>muted</b> #a1aaa7</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #ffbd93; --content: #826b78; --highlight: #b67c94; --muted: #aaa3a4;">
+        <div class="title-row">
+          <h2>草莓蜜桃</h2>
+          <span class="tag">Peach / Pink</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #ffbd93;"><span>primary</span></div>
+          <div class="swatch" style="--color: #826b78;"><span>content</span></div>
+          <div class="swatch" style="--color: #b67c94;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #aaa3a4;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #ffbd93</div>
+          <div><b>content</b> #826b78</div>
+          <div><b>highlight</b> #b67c94</div>
+          <div><b>muted</b> #aaa3a4</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #9dc9ff; --content: #827560; --highlight: #a99267; --muted: #a7a9ad;">
+        <div class="title-row">
+          <h2>天空奶茶</h2>
+          <span class="tag">Blue / Cream</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #9dc9ff;"><span>primary</span></div>
+          <div class="swatch" style="--color: #827560;"><span>content</span></div>
+          <div class="swatch" style="--color: #a99267;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a7a9ad;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #9dc9ff</div>
+          <div><b>content</b> #827560</div>
+          <div><b>highlight</b> #a99267</div>
+          <div><b>muted</b> #a7a9ad</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #c7b0f2; --content: #806d7e; --highlight: #ad819c; --muted: #a8a3ad;">
+        <div class="title-row">
+          <h2>紫芋莓果</h2>
+          <span class="tag">Purple / Berry</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #c7b0f2;"><span>primary</span></div>
+          <div class="swatch" style="--color: #806d7e;"><span>content</span></div>
+          <div class="swatch" style="--color: #ad819c;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a8a3ad;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #c7b0f2</div>
+          <div><b>content</b> #806d7e</div>
+          <div><b>highlight</b> #ad819c</div>
+          <div><b>muted</b> #a8a3ad</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #8fc6ff; --content: #7f6f66; --highlight: #ad8b72; --muted: #a8a6a3;">
+        <div class="title-row">
+          <h2>海盐焦糖</h2>
+          <span class="tag">Blue / Caramel</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #8fc6ff;"><span>primary</span></div>
+          <div class="swatch" style="--color: #7f6f66;"><span>content</span></div>
+          <div class="swatch" style="--color: #ad8b72;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a8a6a3;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #8fc6ff</div>
+          <div><b>content</b> #7f6f66</div>
+          <div><b>highlight</b> #ad8b72</div>
+          <div><b>muted</b> #a8a6a3</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #82c9f4; --content: #6f7d68; --highlight: #8ca877; --muted: #a2aaa2;">
+        <div class="title-row">
+          <h2>湖蓝鼠尾草</h2>
+          <span class="tag">Blue / Sage</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #82c9f4;"><span>primary</span></div>
+          <div class="swatch" style="--color: #6f7d68;"><span>content</span></div>
+          <div class="swatch" style="--color: #8ca877;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a2aaa2;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #82c9f4</div>
+          <div><b>content</b> #6f7d68</div>
+          <div><b>highlight</b> #8ca877</div>
+          <div><b>muted</b> #a2aaa2</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #9dcaff; --content: #7d6875; --highlight: #b27f98; --muted: #aaa3a8;">
+        <div class="title-row">
+          <h2>云蓝玫瑰</h2>
+          <span class="tag">Blue / Rose</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #9dcaff;"><span>primary</span></div>
+          <div class="swatch" style="--color: #7d6875;"><span>content</span></div>
+          <div class="swatch" style="--color: #b27f98;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #aaa3a8;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #9dcaff</div>
+          <div><b>content</b> #7d6875</div>
+          <div><b>highlight</b> #b27f98</div>
+          <div><b>muted</b> #aaa3a8</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #88bff2; --content: #7b7462; --highlight: #aa9567; --muted: #a9a69e;">
+        <div class="title-row">
+          <h2>晴蓝栗子</h2>
+          <span class="tag">Blue / Chestnut</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #88bff2;"><span>primary</span></div>
+          <div class="swatch" style="--color: #7b7462;"><span>content</span></div>
+          <div class="swatch" style="--color: #aa9567;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a9a69e;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #88bff2</div>
+          <div><b>content</b> #7b7462</div>
+          <div><b>highlight</b> #aa9567</div>
+          <div><b>muted</b> #a9a69e</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #93d2f7; --content: #707184; --highlight: #8d89b1; --muted: #a6a8b0;">
+        <div class="title-row">
+          <h2>冰蓝鸢尾</h2>
+          <span class="tag">Blue / Iris</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #93d2f7;"><span>primary</span></div>
+          <div class="swatch" style="--color: #707184;"><span>content</span></div>
+          <div class="swatch" style="--color: #8d89b1;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a6a8b0;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #93d2f7</div>
+          <div><b>content</b> #707184</div>
+          <div><b>highlight</b> #8d89b1</div>
+          <div><b>muted</b> #a6a8b0</div>
+        </div>
+      </article>
+
+      <article class="palette" style="--primary: #86c4ff; --content: #757066; --highlight: #a69c72; --muted: #a7a7a1;">
+        <div class="title-row">
+          <h2>蓝莓开心果</h2>
+          <span class="tag">Blue / Pistachio</span>
+        </div>
+        <div class="preview">
+          <span class="primary">BetterResidence&nbsp;</span><span class="content">已重新加载&nbsp;</span><span class="highlight">配置文件&nbsp;</span><span class="content">!&nbsp;</span><span class="muted">本命令为管理员命令</span>
+        </div>
+        <div class="swatches">
+          <div class="swatch" style="--color: #86c4ff;"><span>primary</span></div>
+          <div class="swatch" style="--color: #757066;"><span>content</span></div>
+          <div class="swatch" style="--color: #a69c72;"><span>highlight</span></div>
+          <div class="swatch" style="--color: #a7a7a1;"><span>muted</span></div>
+        </div>
+        <div class="tokens">
+          <div><b>primary</b> #86c4ff</div>
+          <div><b>content</b> #757066</div>
+          <div><b>highlight</b> #a69c72</div>
+          <div><b>muted</b> #a7a7a1</div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

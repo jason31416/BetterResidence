@@ -1,8 +1,7 @@
 default:
-  primary: "<#B19CD9>"
-  content: "<#A8D8EA>"
-  highlight: "<#6CB4EE>"
-  muted: "<#CCCCCC>"
+  content: "<#2ECCF0>"
+  highlight: "<#9BE66A>"
+  muted: "<#7e8188>"
   error-primary: "<#CC1613>"
   error-content: "<#F85654>"
   error-highlight: "<#F8D854>"

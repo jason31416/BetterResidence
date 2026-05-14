@@ -5,8 +5,14 @@ api-version: '1.21'
 authors: [ Jason31416 ]
 depend: [ Vault ]
 softdepend: [ PlaceholderAPI ]
+
 commands:
   betterresidence:
     description: BetterResidence's main command.
     aliases: [res, betterres, bres]
     usage: /<command>
+
+permissions:
+  betterresidence.admin:
+    description: Allows using BetterResidence admin commands.
+    default: op

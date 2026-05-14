@@ -10,6 +10,8 @@ public class BetterResidenceCommand extends RootCommand {
 
     public BetterResidenceCommand() {
         super("betterresidence");
+
+        new ReloadCommand(this);
     }
 
     @Override
@@ -19,6 +21,6 @@ public class BetterResidenceCommand extends RootCommand {
 
     @Override
     public List<String> tabComplete(ICommandContext context) {
-        return List.of();
+        return List.of("reload");
     }
 }
