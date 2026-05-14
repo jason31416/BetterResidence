@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.claim.ClaimManager;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.message.StringMessage;
 import cn.jason31416.planetlib.util.Lang;
@@ -40,8 +41,8 @@ public class GeneralEventListener implements Listener {
     }
 
     private void handleClaimChange(Player player, Location from, Location to) {
-        Claim fromClaim = Claim.findClaimAt(SimpleLocation.of(from));
-        Claim toClaim = Claim.findClaimAt(SimpleLocation.of(to));
+        Claim fromClaim = ClaimManager.findClaimAt(SimpleLocation.of(from));
+        Claim toClaim = ClaimManager.findClaimAt(SimpleLocation.of(to));
 
         String fromClaimUuid = fromClaim == null ? null : fromClaim.getUuid();
         String toClaimUuid = toClaim == null ? null : toClaim.getUuid();

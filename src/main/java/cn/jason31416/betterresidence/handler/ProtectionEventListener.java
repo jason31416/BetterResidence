@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.claim.ClaimManager;
 import cn.jason31416.betterresidence.claim.PermissionType;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
@@ -44,7 +45,7 @@ public class ProtectionEventListener implements Listener {
     }
 
     private void handlePlayerEvent(Cancellable event, SimplePlayer player, SimpleLocation location, String permission, @Nullable String material){
-        Claim claim = Claim.findClaimAt(location);
+        Claim claim = ClaimManager.findClaimAt(location);
         if(claim==null){
             return;
         }

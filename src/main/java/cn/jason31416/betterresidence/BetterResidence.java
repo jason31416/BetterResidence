@@ -1,5 +1,6 @@
 package cn.jason31416.betterresidence;
 
+import cn.jason31416.betterresidence.claim.ClaimManager;
 import cn.jason31416.betterresidence.claim.MaterialGroup;
 import cn.jason31416.betterresidence.claim.AreaBox;
 import cn.jason31416.betterresidence.claim.Claim;
@@ -59,12 +60,12 @@ public final class BetterResidence extends JavaPlugin {
             return;
         }
 
-        Claim.createClaim(
+        ClaimManager.createClaim(
                 SimplePlayer.of("testing"),
                 name,
                 null,
                 SimpleWorld.defaultWorld(),
-                new AreaBox(-5, 5, 50, 75, -5, 5)
+                new AreaBox(-5, 50, 50, 75, -5, 5)
         );
     }
 
