@@ -14,7 +14,7 @@ command:
 
 claim:
   prohibited-action: "<error-highlight>%group-name% <error-content>没有权限 %permission%"
-  entered: "<content>已进入领地 <highlight>%claim%"
+  entered: "<content>欢迎进入 <highlight>%owner% <content>的领地 <highlight>%claim%"
   left: "<content>已离开领地 <highlight>%claim%"
 
   action:

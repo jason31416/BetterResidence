@@ -33,22 +33,22 @@ public final class ClaimAreaLookup {
      */
     @Nullable
     public static Claim findClaimAt(SimpleLocation location) {
-        long startNanos = System.nanoTime();
+//        long startNanos = System.nanoTime();
 
         SimpleLocation blockLocation = location.getBlockLocation();
-        String world = blockLocation.world().getName();
+        String worldUuid = location.getWorld().getBukkitWorld().getUID().toString();
         int x = (int) blockLocation.x();
         int y = (int) blockLocation.y();
         int z = (int) blockLocation.z();
 
-        ChunkKey key = chunkKey(world, x, z);
-        long nano1 = System.nanoTime();
+        ChunkKey key = chunkKey(worldUuid, x, z);
+//        long nano1 = System.nanoTime();
 
         CachedLookup cachedLookup = getCachedOrFetchAreas(key);
-        long nano2 = System.nanoTime();
+//        long nano2 = System.nanoTime();
         Claim claim = findDeepestClaimAt(cachedLookup.areas(), x, y, z);
-        long nano3 = System.nanoTime();
-        PluginLogger.info("findClaimAt cacheHit="+cachedLookup.cacheHit+" initTime="+(nano1-startNanos)+" fetchTime="+(nano2-nano1)+" depthTime="+(nano3-nano2)+" foundAreas="+cachedLookup.areas().size());
+//        long nano3 = System.nanoTime();
+//        PluginLogger.info("findClaimAt cacheHit="+cachedLookup.cacheHit+" initTime="+(nano1-startNanos)+" fetchTime="+(nano2-nano1)+" depthTime="+(nano3-nano2)+" foundAreas="+cachedLookup.areas().size());
 
 
         return claim;
@@ -58,9 +58,9 @@ public final class ClaimAreaLookup {
         cache.invalidateAll();
     }
 
-    private static ChunkKey chunkKey(String world, int x, int z) {
+    private static ChunkKey chunkKey(String worldUuid, int x, int z) {
         return new ChunkKey(
-                world,
+                worldUuid,
                 Math.floorDiv(x, CHUNK_SIZE),
                 Math.floorDiv(z, CHUNK_SIZE)
         );
@@ -155,7 +155,7 @@ public final class ClaimAreaLookup {
                         Param.of(box.minY()),
                         Param.of(box.maxZ()),
                         Param.of(box.minZ()),
-                        Param.of(key.world())
+                        Param.of(key.worldUuid())
                 ),
                 ClaimAreaLookup::mapIndexedArea
         );
@@ -178,7 +178,7 @@ public final class ClaimAreaLookup {
         );
     }
 
-    private record ChunkKey(String world, int chunkX, int chunkZ) {
+    private record ChunkKey(String worldUuid, int chunkX, int chunkZ) {
     }
 
     private record IndexedArea(int areaId, String world, AreaBox box, String claimUuid) {

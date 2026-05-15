@@ -8,3 +8,6 @@ lang: "zh-cn"
 # Message Color Theme
 # Refer to the theme set in lang/theme.yml
 theme: "default"
+
+particle:
+  range: 16

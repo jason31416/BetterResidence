@@ -77,17 +77,17 @@ public class Claim {
      */
     @SneakyThrows
     public int createArea(SimpleWorld world, AreaBox areaBox) {
-        return createArea(world.getName(), areaBox);
+        return createArea(world.getBukkitWorld().getUID().toString(), areaBox);
     }
 
     /**
      * Create a block-aligned area for this claim.
-     * @param worldName The world name the area belongs to.
+     * @param worldUuid The world UUID the area belongs to.
      * @param areaBox Inclusive integer block bounds.
      * @return The created area id.
      */
     @SneakyThrows
-    public int createArea(String worldName, AreaBox areaBox) {
+    public int createArea(String worldUuid, AreaBox areaBox) {
         synchronized (areaCreateLock) {
             int areaId = allocateNextAreaId();
 
@@ -103,7 +103,7 @@ public class Claim {
                     DataHandler.getDatabase().insert("claim_areas")
                             .value("area_id", areaId)
                             .value("claim_uuid", uuid)
-                            .value("world", worldName)
+                            .value("world", worldUuid)
             ));
 
             ClaimAreaLookup.clearCache();

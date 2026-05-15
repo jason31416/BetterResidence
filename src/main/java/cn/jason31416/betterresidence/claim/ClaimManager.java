@@ -62,7 +62,7 @@ public class ClaimManager {
      */
     @SneakyThrows
     public static Claim createClaim(SimplePlayer owner, String name, @Nullable String parentUuid, SimpleWorld world, AreaBox areaBox) {
-        return createClaim(owner, name, parentUuid, world.getName(), areaBox);
+        return createClaim(owner, name, parentUuid, world.getBukkitWorld().getUID().toString(), areaBox);
     }
 
     /**
@@ -70,12 +70,12 @@ public class ClaimManager {
      * @param owner The claim owner.
      * @param name The claim name.
      * @param parentUuid The parent claim UUID, or null for a top-level claim.
-     * @param worldName The world name the first area belongs to.
+     * @param worldUuid The world UUID the first area belongs to.
      * @param areaBox Inclusive integer block bounds for the first area.
      * @return The created claim.
      */
     @SneakyThrows
-    public static Claim createClaim(SimplePlayer owner, String name, @Nullable String parentUuid, String worldName, AreaBox areaBox) {
+    public static Claim createClaim(SimplePlayer owner, String name, @Nullable String parentUuid, String worldUuid, AreaBox areaBox) {
         synchronized (Claim.areaCreateLock) {
             String claimUuid = UUID.randomUUID().toString();
             int areaId = Claim.allocateNextAreaId();
@@ -97,7 +97,7 @@ public class ClaimManager {
                     DataHandler.getDatabase().insert("claim_areas")
                             .value("area_id", areaId)
                             .value("claim_uuid", claimUuid)
-                            .value("world", worldName)
+                            .value("world", worldUuid)
             ));
 
             Claim claim = new Claim(owner, name, claimUuid, parentUuid);

@@ -16,9 +16,11 @@ import cn.jason31416.betterresidence.command.BetterResidenceCommand;
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.betterresidence.handler.GeneralEventListener;
 import cn.jason31416.betterresidence.handler.ProtectionEventListener;
+import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.util.Util;
 import lombok.Getter;
+import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -60,12 +62,14 @@ public final class BetterResidence extends JavaPlugin {
             return;
         }
 
-        ClaimManager.createClaim(
-                SimplePlayer.of("testing"),
+        AreaBox ab = new AreaBox(-5, 50, 0, 300, -1000, 1000);
+
+        Claim claim = ClaimManager.createClaim(
+                SimplePlayer.of("HelloThere"),
                 name,
                 null,
                 SimpleWorld.defaultWorld(),
-                new AreaBox(-5, 50, 50, 75, -5, 5)
+                ab
         );
     }
 
@@ -81,6 +85,7 @@ public final class BetterResidence extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        AreaBoxVisualizerManager.shutdown();
         DataHandler.close();
         PluginLogger.send(Lang.getMessage("console.disabled"));
     }
