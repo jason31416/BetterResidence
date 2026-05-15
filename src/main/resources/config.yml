@@ -11,3 +11,10 @@ theme: "default"
 
 particle:
   range: 16
+
+claim:
+  default-permissions:
+    trusted-allow-all: # The key here doesn't matter
+      permission: "*:all"
+      weight: 900
+      value: true

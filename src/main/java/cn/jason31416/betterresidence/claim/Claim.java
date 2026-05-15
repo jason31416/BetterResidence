@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.claim;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
+import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.util.MapTree;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
@@ -44,7 +45,7 @@ public class Claim {
 
     private final Map<SimplePlayer, Pair<String, Integer>> playerGroupCache = new ConcurrentHashMap<>();
 
-    private List<PermissionNode> permissionNodes = null;
+    protected List<PermissionNode> permissionNodes = null;
     private Map<String, String> claimFlags = null;
     protected List<String> subClaims = null;
 
@@ -224,24 +225,46 @@ public class Claim {
      */
     private void fetchPermissionNodes() {
         permissionNodes = new ArrayList<>();
+        Set<String> storedPermissionKeys = new HashSet<>();
         List<MapTree> rows = DataHandler.getDatabase().select("claim_permissions")
                 .keyEquals("claim_uuid", uuid)
                 .list();
         for (MapTree row : rows) {
             String permission = row.getString("permission");
-            String name;
-            String material = null;
-            if (permission.contains(":")) {
-                String[] parts = permission.split(":", 2);
-                name = parts[0];
-                material = parts[1];
-            } else {
-                name = permission;
-            }
+            storedPermissionKeys.add(permission);
             int weight = row.getInt("weight");
             boolean state = row.getBoolean("value");
-            permissionNodes.add(new PermissionNode(uuid, name, material, weight, state));
+            permissionNodes.add(createPermissionNode(permission, weight, state));
         }
+
+        if (!Config.contains("claim.default-permissions")) {
+            return;
+        }
+
+        MapTree defaultPermissions = Config.getSection("claim.default-permissions");
+        for (String key : defaultPermissions.getKeys()) {
+            String permission = defaultPermissions.getString(key + ".permission");
+            if (storedPermissionKeys.contains(permission)) {
+                continue;
+            }
+
+            int weight = defaultPermissions.getInt(key + ".weight");
+            boolean state = defaultPermissions.getBoolean(key + ".value");
+            permissionNodes.add(createPermissionNode(permission, weight, state));
+        }
+    }
+
+    private PermissionNode createPermissionNode(String permission, int weight, boolean state) {
+        String name;
+        String material = null;
+        if (permission.contains(":")) {
+            String[] parts = permission.split(":", 2);
+            name = parts[0];
+            material = parts[1];
+        } else {
+            name = permission;
+        }
+        return new PermissionNode(uuid, name, material, weight, state);
     }
 
     /**
@@ -255,19 +278,13 @@ public class Claim {
         if(permissionNodes==null) fetchPermissionNodes();
         Optional<PermissionNode> result = permissionNodes.stream()
                 .filter(node->weight>=node.getWeight())
-                .filter(node->node.getName().equals(permission))
-                .max(Comparator.comparingInt(node->{
-                    if(material==null) return 0; // If material=null, we assume that theres only one permission
-                    if(node.getMaterial().equals(material.toLowerCase(Locale.ROOT))){
-                        return Integer.MAX_VALUE;
-                    }else{
-                        MaterialGroup group = MaterialGroup.getMaterialGroup(node.getMaterial());
-                        if(group==null||!group.isInGroup(material)){
-                            return -1;
-                        }
-                        return group.getPriority();
-                    }
-                }));
+                .filter(node->node.getPermissionPriority(permission)>=0)
+                .filter(node->node.getMaterialPriority(material)>=0)
+                // Permission-name specificity is compared before material specificity.
+                // Example: block.break:all must beat block.*:grass_block.
+                .max(Comparator
+                        .comparingInt((PermissionNode node) -> node.getPermissionPriority(permission))
+                        .thenComparingInt(node -> node.getMaterialPriority(material)));
         return result.map(PermissionNode::isState).orElse(false);
     }
 
