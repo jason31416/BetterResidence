@@ -1,7 +1,7 @@
 package cn.jason31416.betterresidence;
 
 import cn.jason31416.betterresidence.claim.ClaimManager;
-import cn.jason31416.betterresidence.claim.MaterialGroup;
+import cn.jason31416.betterresidence.claim.TargetGroup;
 import cn.jason31416.betterresidence.claim.AreaBox;
 import cn.jason31416.betterresidence.claim.Claim;
 import cn.jason31416.planetlib.Required;
@@ -80,7 +80,7 @@ public final class BetterResidence extends JavaPlugin {
         Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
         MessageTheme.loadThemesFromFile("lang/theme.yml");
         MessageTheme.useTheme(Config.getString("theme", "default"));
-        MaterialGroup.loadConfig();
+        TargetGroup.loadConfig();
     }
 
     @Override

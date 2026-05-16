@@ -3,7 +3,6 @@ package cn.jason31416.betterresidence.handler;
 import cn.jason31416.betterresidence.BetterResidence;
 import cn.jason31416.planetlib.data.Database;
 import cn.jason31416.planetlib.data.TableSchema;
-import cn.jason31416.planetlib.data.type.BooleanColumn;
 import cn.jason31416.planetlib.data.type.IntegerColumn;
 import cn.jason31416.planetlib.data.type.StringColumn;
 import lombok.Getter;
@@ -35,8 +34,7 @@ public class DataHandler {
         );
         database.registerTable(new TableSchema("claim_permissions")
                 .addColumn("permission", new StringColumn()) // bukkit permission like permission node keys, e.g. block.break:oak or entity.kill:animals or block.interact (which is equiv to block.interact:all) or misc.teleport, etc.
-                .addColumn("weight", new IntegerColumn()) // 0-1000, 1000 means applicable to everyone except owner, default is 900 (applicable to everyone except owner and trusted)
-                .addColumn("value", new BooleanColumn()) // allow or disallow
+                .addColumn("weight", new IntegerColumn()) // 0-1000, minimum player group weight required for this permission.
                 .addColumn("claim_uuid", new StringColumn())
         );
         database.registerTable(new TableSchema("group_weights") // Each residence can have multiple groups. This table will store all groups BESIDES the three default (0 everyone, 900 trusted, 1000 owner)

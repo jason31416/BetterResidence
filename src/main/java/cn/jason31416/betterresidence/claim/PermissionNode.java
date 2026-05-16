@@ -4,23 +4,36 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import javax.annotation.Nullable;
-import java.util.Locale;
 
 @Getter @AllArgsConstructor
+/**
+ * A single permission threshold rule for a claim.
+ * <p>
+ * The node stores the permission name, optional target suffix, and minimum group weight required
+ * to satisfy the rule.
+ */
 public class PermissionNode {
     private final String claimUUID;
     private final String name;
-    private final String material; // can be a direct Material or a material group's id. Consider material only for dev.
-    private final int weight; // The node will only apply to group weights greater than or equal to this value
-    private final boolean state;
+    private final String target; // can be a direct target or a target group's id.
+    private final int weight; // Minimum group weight required for this permission.
 
+    /**
+     * @return The full permission key, including {@code :target} when present.
+     */
     public String getPermissionKey(){
-        if(material==null){
+        if(target==null){
             return name;
         }
-        return name+":"+material;
+        return name+":"+target;
     }
 
+    /**
+     * Resolve how specifically this node's permission name matches a checked permission.
+     *
+     * @param permission Runtime permission id without {@code :target}.
+     * @return {@code -1} when not matched; otherwise a priority where larger values are more specific.
+     */
     public int getPermissionPriority(String permission) {
         // Exact permission nodes beat wildcard nodes, regardless of material specificity.
         if (name.equals(permission)) {
@@ -43,22 +56,14 @@ public class PermissionNode {
         return -1; // This node doesn't match the permission
     }
 
-    public int getMaterialPriority(@Nullable String checkedMaterial) {
-        if (checkedMaterial == null || material == null) {
-            // when checkedMaterial or material is null, its either the event don't have material or this node doesn't care about material, we should skip this check.
-            return 0;
-        }
-
-        String normalizedMaterial = checkedMaterial.toLowerCase(Locale.ROOT);
-        if (material.equals(normalizedMaterial)) {
-            return Integer.MAX_VALUE;
-        }
-
-        // Material groups keep their existing priority ranking within the same permission name priority.
-        MaterialGroup group = MaterialGroup.getMaterialGroup(material);
-        if (group == null || !group.isInGroup(normalizedMaterial)) {
-            return -1; // Material doesn't match, so this permission isn't applicable
-        }
-        return group.getPriority();
+    /**
+     * Resolve how specifically this node's optional target matches a checked runtime target.
+     *
+     * @param targetType Target type of the checked permission.
+     * @param checkedTarget Runtime target id, or null for untargeted checks.
+     * @return {@code -1} when not matched; otherwise a priority where larger values are more specific.
+     */
+    public int getTargetPriority(PermissionTargetType targetType, @Nullable String checkedTarget) {
+        return targetType.getTargetPriority(target, checkedTarget);
     }
 }

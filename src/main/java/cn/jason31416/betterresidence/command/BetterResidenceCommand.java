@@ -4,14 +4,15 @@ import cn.jason31416.planetlib.command.RootCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.message.Message;
 
-import java.util.List;
-
 public class BetterResidenceCommand extends RootCommand {
 
     public BetterResidenceCommand() {
         super("betterresidence");
 
         new ReloadCommand(this);
+        new TrustCommand(this);
+        new UntrustCommand(this);
+        new SetCommand(this);
     }
 
     @Override
@@ -19,8 +20,5 @@ public class BetterResidenceCommand extends RootCommand {
         return null;
     }
 
-    @Override
-    public List<String> tabComplete(ICommandContext context) {
-        return List.of("reload");
-    }
+    // We don't need to manually handle tab complete for rootcommand.
 }

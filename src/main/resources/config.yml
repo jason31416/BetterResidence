@@ -17,4 +17,6 @@ claim:
     trusted-allow-all: # The key here doesn't matter
       permission: "*:all"
       weight: 900
-      value: true
+    owner-only-admin:
+      permission: "admin"
+      weight: 1000

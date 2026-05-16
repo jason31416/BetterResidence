@@ -220,6 +220,79 @@ public class Claim {
         return getPlayerGroup(player).second();
     }
 
+    public boolean setPlayerGroup(SimplePlayer player, @Nullable String groupName) {
+        if(player.equals(owner)) throw new IllegalArgumentException("Cannot set player group for owner");
+
+        String groupId = null;
+        if (groupName != null) {
+            String trustedGroupName = Lang.messageLoader.getRawMessage("claim.group.trusted", "Trusted");
+            String noneGroupName = Lang.messageLoader.getRawMessage("claim.group.none", "None");
+            if (groupName.equals(noneGroupName)) {
+                groupName = null;
+            } else if (groupName.equals(trustedGroupName)) {
+                groupId = "trusted";
+            } else {
+                Optional<MapTree> groupWeight = DataHandler.getDatabase().select("group_weights")
+                        .keyEquals("group_name", groupName)
+                        .keyEquals("claim_uuid", uuid)
+                        .one();
+                if (groupWeight.isEmpty()) {
+                    return false;
+                }
+                groupId = groupWeight.get().getString("group_id");
+            }
+        }
+
+        DataHandler.getDatabase().delete("player_groups")
+                .keyEquals("player_uuid", player.getUUID().toString())
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+
+        if (groupName != null) {
+            DataHandler.getDatabase().insert("player_groups")
+                    .value("player_uuid", player.getUUID().toString())
+                    .value("group_id", groupId)
+                    .value("claim_uuid", uuid)
+                    .executeUpdate();
+        }
+
+        playerGroupCache.remove(player);
+        return true;
+    }
+
+    public Optional<Integer> getGroupWeight(String groupName) {
+        if (groupName.equals(Lang.messageLoader.getRawMessage("claim.group.none", "None"))) {
+            return Optional.of(0);
+        }
+        if (groupName.equals(Lang.messageLoader.getRawMessage("claim.group.trusted", "Trusted"))) {
+            return Optional.of(900);
+        }
+        if (groupName.equals(Lang.messageLoader.getRawMessage("claim.group.owner", "Owner"))) {
+            return Optional.of(1000);
+        }
+
+        return DataHandler.getDatabase().select("group_weights")
+                .keyEquals("group_name", groupName)
+                .keyEquals("claim_uuid", uuid)
+                .one()
+                .map(row -> row.getInt("weight"));
+    }
+
+    public void setPermission(String permission, int weight) {
+        DataHandler.getDatabase().delete("claim_permissions")
+                .keyEquals("permission", permission)
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+
+        DataHandler.getDatabase().insert("claim_permissions")
+                .value("permission", permission)
+                .value("weight", weight)
+                .value("claim_uuid", uuid)
+                .executeUpdate();
+
+        permissionNodes = null;
+    }
+
     /**
      * Load all permission nodes into memory
      */
@@ -233,8 +306,7 @@ public class Claim {
             String permission = row.getString("permission");
             storedPermissionKeys.add(permission);
             int weight = row.getInt("weight");
-            boolean state = row.getBoolean("value");
-            permissionNodes.add(createPermissionNode(permission, weight, state));
+            permissionNodes.add(createPermissionNode(permission, weight));
         }
 
         if (!Config.contains("claim.default-permissions")) {
@@ -249,50 +321,51 @@ public class Claim {
             }
 
             int weight = defaultPermissions.getInt(key + ".weight");
-            boolean state = defaultPermissions.getBoolean(key + ".value");
-            permissionNodes.add(createPermissionNode(permission, weight, state));
+            permissionNodes.add(createPermissionNode(permission, weight));
         }
     }
 
-    private PermissionNode createPermissionNode(String permission, int weight, boolean state) {
+    private PermissionNode createPermissionNode(String permission, int weight) {
         String name;
-        String material = null;
+        String target = null;
         if (permission.contains(":")) {
             String[] parts = permission.split(":", 2);
             name = parts[0];
-            material = parts[1];
+            target = parts[1];
         } else {
             name = permission;
         }
-        return new PermissionNode(uuid, name, material, weight, state);
+        return new PermissionNode(uuid, name, target, weight);
     }
 
     /**
      * Check a weight's permission to do something
      * @param weight The weight of the player.
      * @param permission The action
-     * @param material Nullable. The material of the action (Depending on the action, can be block, item, or entity depending on the event.)
+     * @param target Nullable. The target of the action, such as block material, item material, or entity type.
      */
-    private boolean checkWeightPermission(int weight, String permission, @Nullable String material){
+    private boolean checkWeightPermission(int weight, String permission, @Nullable String target){
         if(weight==1000) return true; // Owner always have all permissions.
         if(permissionNodes==null) fetchPermissionNodes();
+        PermissionTargetType targetType = PermissionRegistry.getPermission(permission)
+                .map(PermissionRegistry.RegisteredPermission::targetType)
+                .orElse(PermissionTargetType.NONE);
         Optional<PermissionNode> result = permissionNodes.stream()
-                .filter(node->weight>=node.getWeight())
                 .filter(node->node.getPermissionPriority(permission)>=0)
-                .filter(node->node.getMaterialPriority(material)>=0)
+                .filter(node->node.getTargetPriority(targetType, target)>=0)
                 // Permission-name specificity is compared before material specificity.
                 // Example: block.break:all must beat block.*:grass_block.
                 .max(Comparator
                         .comparingInt((PermissionNode node) -> node.getPermissionPriority(permission))
-                        .thenComparingInt(node -> node.getMaterialPriority(material)));
-        return result.map(PermissionNode::isState).orElse(false);
+                        .thenComparingInt(node -> node.getTargetPriority(targetType, target)));
+        return result.map(node -> weight >= node.getWeight()).orElse(false);
     }
 
     /**
      * Check a player's permission
      * Too simple too lazy to make doc
      */
-    public boolean checkPlayerPermission(SimplePlayer player, String permission, @Nullable String material){
-        return checkWeightPermission(getPlayerWeight(player), permission, material);
+    public boolean checkPlayerPermission(SimplePlayer player, String permission, @Nullable String target){
+        return checkWeightPermission(getPlayerWeight(player), permission, target);
     }
 }

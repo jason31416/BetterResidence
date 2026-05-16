@@ -2,15 +2,11 @@ package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.claim.Claim;
 import cn.jason31416.betterresidence.claim.ClaimManager;
-import cn.jason31416.betterresidence.claim.PermissionType;
-import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
-import cn.jason31416.planetlib.util.PluginLogger;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -62,7 +58,7 @@ public class ProtectionEventListener implements Listener {
         handlePlayerEvent(event,
                 player,
                 location,
-                PermissionType.BLOCK_BREAK.getId(),
+                "block.break",
                 event.getBlock().getType().name()
         );
     }

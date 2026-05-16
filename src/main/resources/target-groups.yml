@@ -1,0 +1,28 @@
+block:
+  all:
+    name: "target-group.block.all"
+    priority: 1
+    targets:
+      - ".*"
+  container:
+    name: "target-group.block.container"
+    priority: 2
+    targets:
+      - "chest"
+      - ".*_chest"
+      - "chest_minecart"
+      - ".*_chest_boat"
+
+material:
+  all:
+    name: "target-group.material.all"
+    priority: 1
+    targets:
+      - ".*"
+
+entity:
+  all:
+    name: "target-group.entity.all"
+    priority: 1
+    targets:
+      - ".*"
