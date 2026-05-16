@@ -34,10 +34,10 @@ public class DataHandler {
         );
         database.registerTable(new TableSchema("claim_permissions")
                 .addColumn("permission", new StringColumn()) // bukkit permission like permission node keys, e.g. block.break:oak or entity.kill:animals or block.interact (which is equiv to block.interact:all) or misc.teleport, etc.
-                .addColumn("weight", new IntegerColumn()) // 0-1000, minimum player group weight required for this permission.
+                .addColumn("weight", new IntegerColumn()) // -1000..1000, minimum player group weight required for this permission.
                 .addColumn("claim_uuid", new StringColumn())
         );
-        database.registerTable(new TableSchema("group_weights") // Each residence can have multiple groups. This table will store all groups BESIDES the three default (0 everyone, 900 trusted, 1000 owner)
+        database.registerTable(new TableSchema("group_weights") // Per-claim custom groups; configured groups are loaded from config.yml.
                 .addColumn("group_id", new StringColumn())
                 .addColumn("weight", new IntegerColumn())
                 .addColumn("group_name", new StringColumn())

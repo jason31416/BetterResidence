@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence;
 
 import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.claim.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.claim.TargetGroup;
 import cn.jason31416.betterresidence.claim.AreaBox;
 import cn.jason31416.betterresidence.claim.Claim;
@@ -20,9 +21,6 @@ import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.util.Util;
 import lombok.Getter;
-import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 public final class BetterResidence extends JavaPlugin {
     @Getter
@@ -80,6 +78,7 @@ public final class BetterResidence extends JavaPlugin {
         Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
         MessageTheme.loadThemesFromFile("lang/theme.yml");
         MessageTheme.useTheme(Config.getString("theme", "default"));
+        DefaultClaimGroupRegistry.loadConfig();
         TargetGroup.loadConfig();
     }
 

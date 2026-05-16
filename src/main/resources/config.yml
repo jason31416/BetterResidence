@@ -13,10 +13,24 @@ particle:
   range: 16
 
 claim:
+  # Configured groups are global templates. Visitor is not configured here: it means no group
+  # record and always has weight 0. "claim.group.everyone" is only a /res set alias for -1000.
+  # Group weights must be between -1000 and 1000. Owner must be exactly 1000.
+  groups:
+    owner:
+      name: "lang:claim.group.owner"
+      weight: 1000
+    trusted:
+      name: "lang:claim.group.trusted"
+      weight: 900
+    blacklisted:
+      name: "lang:claim.group.blacklisted"
+      weight: -100
+
   default-permissions:
-    trusted-allow-all: # The key here doesn't matter
+    trusted-allow-all: # The key here doesn't matter. By default, trusted can have permission to build/place/etc.
       permission: "*:all"
       weight: 900
-    owner-only-admin:
+    owner-only-admin: # By default, only owner should be able to grant/revoke permission and edit claim settings.
       permission: "admin"
       weight: 1000

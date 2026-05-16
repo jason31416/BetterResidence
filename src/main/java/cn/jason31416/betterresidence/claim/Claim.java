@@ -2,22 +2,16 @@ package cn.jason31416.betterresidence.claim;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.planetlib.util.Config;
-import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.util.MapTree;
-import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import cn.jason31416.planetlib.wrapper.SimpleWorld;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.bukkit.Material;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class Claim {
     // Static method/variables
@@ -184,7 +178,8 @@ public class Claim {
         return playerGroupCache.computeIfAbsent(player, p -> {
             // Owner always gets weight 1000
             if (p.equals(owner)) {
-                return Pair.of(Lang.messageLoader.getRawMessage("claim.group.owner", "Owner"), 1000);
+                ClaimGroup ownerGroup = DefaultClaimGroupRegistry.getOwnerGroup();
+                return Pair.of(ownerGroup.name(), ownerGroup.weight());
             }
 
             // Query player_groups to find the group this player belongs to
@@ -195,24 +190,13 @@ public class Claim {
 
             if (playerGroup.isPresent()) {
                 String groupId = playerGroup.get().getString("group_id");
-
-                if(groupId.equals("trusted")){
-                    return Pair.of(Lang.messageLoader.getRawMessage("claim.group.trusted", "Trusted"), 900);
-                }
-
-                // Query group_weights to get the weight for this group
-                Optional<MapTree> groupWeight = DataHandler.getDatabase().select("group_weights")
-                        .keyEquals("group_id", groupId)
-                        .keyEquals("claim_uuid", uuid)
-                        .one();
-
-                if (groupWeight.isPresent()) {
-                    return Pair.of(groupWeight.get().getString("group_name"), groupWeight.get().getInt("weight"));
-                }
+                return getClaimGroupById(groupId)
+                        .map(group -> Pair.of(group.name(), group.weight()))
+                        .orElseGet(() -> Pair.of(DefaultClaimGroupRegistry.getVisitorName(), DefaultClaimGroupRegistry.VISITOR_WEIGHT));
             }
 
             // Default weight for everyone (not trusted, not owner)
-            return Pair.of(Lang.messageLoader.getRawMessage("claim.group.none", "None"), 0);
+            return Pair.of(DefaultClaimGroupRegistry.getVisitorName(), DefaultClaimGroupRegistry.VISITOR_WEIGHT);
         });
     }
 
@@ -225,21 +209,16 @@ public class Claim {
 
         String groupId = null;
         if (groupName != null) {
-            String trustedGroupName = Lang.messageLoader.getRawMessage("claim.group.trusted", "Trusted");
-            String noneGroupName = Lang.messageLoader.getRawMessage("claim.group.none", "None");
-            if (groupName.equals(noneGroupName)) {
+            if (groupName.equals(DefaultClaimGroupRegistry.getVisitorName())) {
                 groupName = null;
-            } else if (groupName.equals(trustedGroupName)) {
-                groupId = "trusted";
+            } else if (groupName.equals(DefaultClaimGroupRegistry.getEveryoneName())) {
+                return false;
             } else {
-                Optional<MapTree> groupWeight = DataHandler.getDatabase().select("group_weights")
-                        .keyEquals("group_name", groupName)
-                        .keyEquals("claim_uuid", uuid)
-                        .one();
-                if (groupWeight.isEmpty()) {
+                Optional<ClaimGroup> group = getClaimGroupByName(groupName);
+                if (group.isEmpty() || group.get().id().equals(DefaultClaimGroupRegistry.OWNER_ID)) {
                     return false;
                 }
-                groupId = groupWeight.get().getString("group_id");
+                groupId = group.get().id();
             }
         }
 
@@ -261,21 +240,46 @@ public class Claim {
     }
 
     public Optional<Integer> getGroupWeight(String groupName) {
-        if (groupName.equals(Lang.messageLoader.getRawMessage("claim.group.none", "None"))) {
-            return Optional.of(0);
+        if (groupName.equals(DefaultClaimGroupRegistry.getEveryoneName())) {
+            return Optional.of(DefaultClaimGroupRegistry.EVERYONE_WEIGHT);
         }
-        if (groupName.equals(Lang.messageLoader.getRawMessage("claim.group.trusted", "Trusted"))) {
-            return Optional.of(900);
-        }
-        if (groupName.equals(Lang.messageLoader.getRawMessage("claim.group.owner", "Owner"))) {
-            return Optional.of(1000);
+        if (groupName.equals(DefaultClaimGroupRegistry.getVisitorName())) {
+            return Optional.of(DefaultClaimGroupRegistry.VISITOR_WEIGHT);
         }
 
-        return DataHandler.getDatabase().select("group_weights")
-                .keyEquals("group_name", groupName)
+        return getClaimGroupByName(groupName).map(ClaimGroup::weight);
+    }
+
+    /**
+     * Return all real permission groups available in this claim.
+     * <p>
+     * The list intentionally excludes visitor and everyone because they are not real assignable
+     * groups. Callers can add visitor or everyone explicitly when their command accepts those
+     * special names.
+     */
+    public List<ClaimGroup> getClaimGroups() {
+        List<ClaimGroup> claimGroups = new ArrayList<>(DefaultClaimGroupRegistry.getConfiguredGroups());
+        DataHandler.getDatabase().select("group_weights")
                 .keyEquals("claim_uuid", uuid)
-                .one()
-                .map(row -> row.getInt("weight"));
+                .list()
+                .forEach(row -> claimGroups.add(new ClaimGroup(
+                        row.getString("group_id"),
+                        row.getString("group_name"),
+                        row.getInt("weight")
+                )));
+        return claimGroups;
+    }
+
+    private Optional<ClaimGroup> getClaimGroupById(String groupId) {
+        return getClaimGroups().stream()
+                .filter(group -> group.id().equals(groupId))
+                .findFirst();
+    }
+
+    private Optional<ClaimGroup> getClaimGroupByName(String groupName) {
+        return getClaimGroups().stream()
+                .filter(group -> group.name().equals(groupName))
+                .findFirst();
     }
 
     public void setPermission(String permission, int weight) {

@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.command;
 
 import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.claim.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.claim.PermissionRegistry;
 import cn.jason31416.betterresidence.claim.PermissionTargetType;
 import cn.jason31416.planetlib.command.ICommandContext;
@@ -8,6 +9,7 @@ import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.command.ParameterType;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
+import cn.jason31416.planetlib.util.PluginLogger;
 
 import java.util.List;
 import java.util.Optional;
@@ -60,13 +62,17 @@ public class SetCommand extends ClaimAdminCommand {
             return tabCompletePermission(context.getArg(0));
         }
         if (context.args().size() == 2) {
-            return List.of(
-                            Lang.messageLoader.getRawMessage("claim.group.none", "None"),
-                            Lang.messageLoader.getRawMessage("claim.group.trusted", "Trusted"),
-                            Lang.messageLoader.getRawMessage("claim.group.owner", "Owner")
-                    ).stream()
-                    .filter(group -> group.startsWith(context.getArg(1)))
-                    .toList();
+            Claim claim = getClaim(context);
+            if (claim == null) {
+                return List.of();
+            }
+            List<TrustCommand.GroupCompletion> groups = new java.util.ArrayList<>();
+            // /res set accepts non-real threshold aliases in addition to real claim groups.
+            // Initially planned to have everyone, but we removed it realizing that it is a bit confusing.
+//            groups.add(new TrustCommand.GroupCompletion(DefaultClaimGroupRegistry.getEveryoneName(), DefaultClaimGroupRegistry.EVERYONE_WEIGHT));
+            groups.add(new TrustCommand.GroupCompletion(DefaultClaimGroupRegistry.getVisitorName(), DefaultClaimGroupRegistry.VISITOR_WEIGHT));
+            groups.addAll(claim.getClaimGroups().stream().map(TrustCommand.GroupCompletion::from).toList());
+            return TrustCommand.completeGroups(groups);
         }
         return List.of();
     }

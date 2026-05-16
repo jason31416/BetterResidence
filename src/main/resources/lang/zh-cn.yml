@@ -31,6 +31,8 @@ claim:
 
   group:
     none: "访客"
+    everyone: "任何人"
+    blacklisted: "黑名单"
     trusted: "成员"
     owner: "所有者"
 
