@@ -14,6 +14,7 @@ import cn.jason31416.planetlib.message.StringMessage;
 import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
+import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import cn.jason31416.planetlib.wrapper.SimpleWorld;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -33,6 +34,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class GeneralEventListener implements Listener {
@@ -165,13 +167,13 @@ public class GeneralEventListener implements Listener {
             SelectionManager.removeSelectionBox(player);
         }
 
-        createSelectionActionbar(result, selection).sendActionbar(player);
+        createSelectionActionbar(result, selection, player);
     }
 
-    private Message createSelectionActionbar(ClaimCreationValidator.ValidationResult result, SelectionManager.Selection selection) {
+    private void createSelectionActionbar(ClaimCreationValidator.ValidationResult result, SelectionManager.Selection selection, Player player) {
         String key;
         if (!selection.isComplete()) {
-            key = selection.getPos1() == null ? "claim.selection.missing-position-1" : "claim.selection.missing-position-2";
+            return;
         } else if (result.valid()) {
             key = "claim.selection.available";
         } else {
@@ -184,11 +186,12 @@ public class GeneralEventListener implements Listener {
             };
         }
 
-        return Lang.getMessage(key).copy()
+        Lang.getMessage(key).copy()
                 .add("size", result.size())
                 .add("price", formatPrice(result.price()))
                 .add("max", Config.getInt("claim.max-claims-per-player"))
-                .add("conflict", result.conflict());
+                .add("conflict", result.conflict())
+                .sendActionbar(player);
     }
 
     private void flashClaimAreas(Player player, Claim claim) {

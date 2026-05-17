@@ -72,10 +72,8 @@ claim:
   entered: "<content>欢迎进入 <highlight>%owner% <content>的领地 <highlight>%claim%"
   left: "<content>已离开领地 <highlight>%claim%"
   selection:
-    position-1-set: "<content>点1已设置"
-    position-2-set: "<content>点2已设置"
-    missing-position-1: "<content>左键选择点1"
-    missing-position-2: "<content>右键选择点2"
+    position-1-set: "<content>已选择了第一个角"
+    position-2-set: "<content>已选择了第二个角"
     available: "<yellow>/res create <领地名> <muted>| <highlight>$%price% <content>(%size% 方块)"
     different-worlds: "<error-content>不同世界"
     overlap: "<error-content>冲突 <error-highlight>%conflict%"
