@@ -4,6 +4,7 @@ import cn.jason31416.betterresidence.claim.AreaBox;
 import cn.jason31416.planetlib.PlanetLib;
 import cn.jason31416.planetlib.lib.folialib.wrapper.task.WrappedTask;
 import cn.jason31416.planetlib.util.Config;
+import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -22,6 +23,7 @@ public class AreaBoxVisualizer {
     private static final float SIDE_PARTICLE_SIZE = 1.1F;
 
     private final Player player;
+    @Getter
     private final List<RenderedAreaBox> boxes = new ArrayList<>();
 
     private WrappedTask task;
@@ -31,8 +33,10 @@ public class AreaBoxVisualizer {
         this.task = PlanetLib.getScheduler().runAtEntityTimer(player, this::render, 0L, RENDER_PERIOD_TICKS);
     }
 
-    public void addBox(World world, AreaBox areaBox, Color frameColor, Color sideColor) {
-        boxes.add(new RenderedAreaBox(world, areaBox, frameColor, sideColor));
+    public RenderedAreaBox addBox(World world, AreaBox areaBox, Color frameColor, Color sideColor) {
+        RenderedAreaBox box = new RenderedAreaBox(world, areaBox, frameColor, sideColor);
+        boxes.add(box);
+        return box;
     }
 
     public void clearBoxes() {
@@ -102,7 +106,7 @@ public class AreaBoxVisualizer {
         }
     }
 
-    private static class RenderedAreaBox {
+    public static class RenderedAreaBox {
         private final World world;
         private final AreaBox areaBox;
         private final Particle.DustOptions frameParticle;

@@ -48,10 +48,11 @@ public class AreaBoxVisualizerManager {
      * @param areaBox The block-aligned area bounds to render.
      * @param frameColor The color used for box edges.
      * @param sideColor The color used for box faces.
+     * @return The rendered area box object, which can then be used to remove from the list.
      */
-    public static void addBox(Player player, World world, AreaBox areaBox, Color frameColor, Color sideColor) {
+    public static AreaBoxVisualizer.RenderedAreaBox addBox(Player player, World world, AreaBox areaBox, Color frameColor, Color sideColor) {
         create(player);
-        VISUALIZERS.get(player.getUniqueId()).addBox(world, areaBox, frameColor, sideColor);
+        return VISUALIZERS.get(player.getUniqueId()).addBox(world, areaBox, frameColor, sideColor);
     }
 
     /**
