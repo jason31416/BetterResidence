@@ -5,15 +5,10 @@ lang: "zh-cn"
 # Message Color Theme. Refer to the themes in lang/theme.yml.
 theme: "default"
 
-
-
 claim:
   # Maximum top-level claims each player can own. Use -1 for no limit.
+  # The plugin can handle millions of claims with reasonable performance, so you don't have to limit this for performance.
   max-claims-per-player: -1
-  list-page-size: 8
-  info-group-hover-limit: 12
-  info-member-hover-limit: 12
-  info-subclaim-hover-limit: 12
 
   create:
     # Material used to select two claim corners with left/right click.
@@ -21,9 +16,9 @@ claim:
     # Claim creation price per selected block.
     price-per-block: 1.0
 
-  # Configured groups are global templates. Visitor is not configured here: it means no group
-  # record and always has weight 0. "claim.group.everyone" is only a /res set alias for -1000.
+  # Configured groups are global templates. Each claim might have their own groups in addition to these.
   # Group weights must be between -1000 and 1000. Owner must be exactly 1000.
+  # `owner` and `trusted` must exist.
   groups:
     owner:
       name: "lang:claim.group.owner"
@@ -31,6 +26,9 @@ claim:
     trusted:
       name: "lang:claim.group.trusted"
       weight: 900
+
+    # You can freely add/remove entries here.
+
     blacklisted:
       name: "lang:claim.group.blacklisted"
       weight: -100
@@ -43,9 +41,11 @@ claim:
       permission: "admin"
       weight: 1000
 
+
+
 # Visualizer settings control particle-based area previews.
 visualizer:
-  # Maximum distance from a player where visualizer particles are rendered.
+  # [Performance] Maximum distance from a player where visualizer particles are rendered.
   range: 16
 
   # Visualizer colors for the claim creation selection preview.
@@ -83,7 +83,7 @@ visualizer:
   claim-flash:
     enabled: true
     # How long should the particles last
-    duration-millis: 300
+    duration-millis: 1000
     frame-color: "90,170,255"
     side-color: "120,190,255"
 

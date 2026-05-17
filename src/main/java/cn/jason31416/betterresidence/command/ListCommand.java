@@ -7,13 +7,14 @@ import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.message.MessageList;
-import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 
 import java.util.List;
 
 public class ListCommand extends ChildCommand {
+    private static final int PAGE_SIZE = 8;
+
     public ListCommand(IParentCommand parent) {
         super("list", parent);
     }
@@ -45,7 +46,7 @@ public class ListCommand extends ChildCommand {
                     .add("player", ClaimCommandFormat.escape(owner.getName()));
         }
 
-        int pageSize = Math.max(1, Config.getInt("claim.list-page-size"));
+        int pageSize = PAGE_SIZE;
         int pageCount = Math.max(1, (int) Math.ceil((double) claims.size() / pageSize));
         page = Math.min(Math.max(page, 1), pageCount);
         int from = (page - 1) * pageSize;

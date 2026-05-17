@@ -4,7 +4,6 @@ import cn.jason31416.betterresidence.claim.Claim;
 import cn.jason31416.betterresidence.claim.ClaimGroup;
 import cn.jason31416.betterresidence.claim.ClaimManager;
 import cn.jason31416.planetlib.message.Message;
-import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.util.Lang;
 
 import java.util.Comparator;
@@ -12,6 +11,9 @@ import java.util.List;
 
 final class ClaimCommandFormat {
     private static final String EMPTY_FALLBACK = "";
+    private static final int INFO_GROUP_HOVER_LIMIT = 12;
+    private static final int INFO_MEMBER_HOVER_LIMIT = 12;
+    private static final int INFO_SUBCLAIM_HOVER_LIMIT = 12;
 
     private ClaimCommandFormat() {
     }
@@ -49,7 +51,7 @@ final class ClaimCommandFormat {
                         .add("weight", group.weight())
                         .toString())
                 .toList();
-        return joinLimited(groups, Config.getInt("claim.info-group-hover-limit"));
+        return joinLimited(groups, INFO_GROUP_HOVER_LIMIT);
     }
 
     static String memberHover(Claim claim, List<ClaimManager.ClaimMemberInfo> members) {
@@ -63,7 +65,7 @@ final class ClaimCommandFormat {
                                 .map(ClaimGroup::name)
                                 .orElse(member.groupId()))
                         .toString())
-                .toList(), Config.getInt("claim.info-member-hover-limit"));
+                .toList(), INFO_MEMBER_HOVER_LIMIT);
     }
 
     static String subClaimHover(Claim claim) {
@@ -75,7 +77,7 @@ final class ClaimCommandFormat {
                         .add("short-uuid", shortUuid(subClaim.getUuid()))
                         .toString())
                 .toList();
-        return subClaims.isEmpty() ? raw("command.format.no-subclaims") : joinLimited(subClaims, Config.getInt("claim.info-subclaim-hover-limit"));
+        return subClaims.isEmpty() ? raw("command.format.no-subclaims") : joinLimited(subClaims, INFO_SUBCLAIM_HOVER_LIMIT);
     }
 
     static String pageButton(String labelKey, String command, boolean enabled) {
