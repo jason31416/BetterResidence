@@ -2,13 +2,21 @@ package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.BetterResidence;
 import cn.jason31416.planetlib.data.Database;
+import cn.jason31416.planetlib.data.SQLInstance;
 import cn.jason31416.planetlib.data.TableSchema;
+import cn.jason31416.planetlib.data.statement.CompiledSql;
 import cn.jason31416.planetlib.data.type.IntegerColumn;
 import cn.jason31416.planetlib.data.type.StringColumn;
 import lombok.Getter;
 
 import java.io.File;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class DataHandler {
     @Getter
@@ -54,13 +62,101 @@ public class DataHandler {
                 .addColumn("value", new StringColumn())
                 .addColumn("claim_uuid", new StringColumn())
         );
-        database.initializeSchema();
+        initializeRegisteredTables();
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_world_area ON claim_areas(world, area_id);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_claim_uuid ON claim_areas(claim_uuid);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_parent_uuid ON claim(parent_uuid);", List.of());
     }
 
+    public static void executeBatch(List<CompiledSql> statements) {
+        if (statements.isEmpty()) {
+            return;
+        }
+
+        SQLInstance sqlInstance = getDatabase().getSqlInstance();
+        try (var connection = sqlInstance.getConnection()) {
+            boolean previousAutoCommit = connection.getAutoCommit();
+            connection.setAutoCommit(false);
+
+            try {
+                for (CompiledSql statement : statements) {
+                    try (var preparedStatement = connection.prepareStatement(statement.sql())) {
+                        SQLInstance.bindParams(preparedStatement, statement.params());
+                        preparedStatement.executeUpdate();
+                    }
+                }
+
+                connection.commit();
+            } catch (Exception exception) {
+                connection.rollback();
+                throw exception;
+            } finally {
+                connection.setAutoCommit(previousAutoCommit);
+            }
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to execute SQL batch", exception);
+        }
+    }
+
     public static void close() {
         getDatabase().getSqlInstance().close();
+    }
+
+    private static void initializeRegisteredTables() {
+        SQLInstance sqlInstance = getDatabase().getSqlInstance();
+        try (var connection = sqlInstance.getConnection()) {
+            DatabaseMetaData metaData = connection.getMetaData();
+            for (TableSchema tableSchema : getDatabase().getTables().values()) {
+                if (!tableExists(metaData, tableSchema.getTableName())) {
+                    executeStatement(connection, sqlInstance.getDialect().createTableSql(tableSchema));
+                    continue;
+                }
+
+                Set<String> existingColumns = getExistingColumns(metaData, tableSchema.getTableName());
+                for (var entry : tableSchema.getColumns().entrySet()) {
+                    if (existingColumns.contains(entry.getKey().toLowerCase(Locale.ROOT))) {
+                        continue;
+                    }
+                    executeStatement(connection, sqlInstance.getDialect().addColumnSql(
+                            tableSchema.getTableName(),
+                            entry.getKey(),
+                            entry.getValue()
+                    ));
+                }
+            }
+        } catch (SQLException exception) {
+            throw new RuntimeException("Failed to initialize database schema", exception);
+        }
+    }
+
+    private static void executeStatement(java.sql.Connection connection, String sql) throws SQLException {
+        try (var statement = connection.prepareStatement(sql)) {
+            statement.execute();
+        }
+    }
+
+    private static boolean tableExists(DatabaseMetaData metaData, String tableName) throws SQLException {
+        try (ResultSet tables = metaData.getTables(null, null, tableName, null)) {
+            while (tables.next()) {
+                String existingTableName = tables.getString("TABLE_NAME");
+                if (existingTableName != null && existingTableName.equalsIgnoreCase(tableName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static Set<String> getExistingColumns(DatabaseMetaData metaData, String tableName) throws SQLException {
+        Set<String> existingColumns = new TreeSet<>();
+        try (ResultSet columns = metaData.getColumns(null, null, tableName, null)) {
+            while (columns.next()) {
+                String columnName = columns.getString("COLUMN_NAME");
+                if (columnName != null) {
+                    existingColumns.add(columnName.toLowerCase(Locale.ROOT));
+                }
+            }
+        }
+        return existingColumns;
     }
 }

@@ -95,6 +95,19 @@ public class ClaimManager {
                 .toList();
     }
 
+    public static List<ClaimFlagInfo> fetchClaimFlags(String claimUuid) {
+        return DataHandler.getDatabase().select("claim_flags")
+                .keyEquals("claim_uuid", claimUuid)
+                .list()
+                .stream()
+                .map(row -> new ClaimFlagInfo(
+                        row.getString("flag"),
+                        row.getString("value")
+                ))
+                .sorted(java.util.Comparator.comparing(ClaimFlagInfo::flag, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
     @SneakyThrows
     private static ClaimAreaInfo mapClaimAreaInfo(ResultSet rs) {
         return new ClaimAreaInfo(
@@ -151,12 +164,13 @@ public class ClaimManager {
             String claimUuid = UUID.randomUUID().toString();
             int areaId = Claim.allocateNextAreaId();
 
-            DataHandler.getDatabase().executeBatch(List.of(
+            DataHandler.executeBatch(List.of(
                     DataHandler.getDatabase().insert("claim")
                             .value("uuid", claimUuid)
                             .value("name", name)
                             .value("owner_uuid", owner.getUUID().toString())
-                            .value("parent_uuid", parentUuid),
+                            .value("parent_uuid", parentUuid)
+                            .compile(),
                     DataHandler.getDatabase().insert("area")
                             .value("id", areaId)
                             .value("minX", areaBox.minX())
@@ -164,11 +178,13 @@ public class ClaimManager {
                             .value("minY", areaBox.minY())
                             .value("maxY", areaBox.maxY())
                             .value("minZ", areaBox.minZ())
-                            .value("maxZ", areaBox.maxZ()),
+                            .value("maxZ", areaBox.maxZ())
+                            .compile(),
                     DataHandler.getDatabase().insert("claim_areas")
                             .value("area_id", areaId)
                             .value("claim_uuid", claimUuid)
                             .value("world", worldUuid)
+                            .compile()
             ));
 
             Claim claim = new Claim(owner, name, claimUuid, parentUuid);
@@ -188,6 +204,9 @@ public class ClaimManager {
     }
 
     public record ClaimMemberInfo(SimplePlayer player, String groupId) {
+    }
+
+    public record ClaimFlagInfo(String flag, String value) {
     }
 
 }

@@ -26,7 +26,10 @@ command:
   info-message:
     - "<dark_gray>━━━━━━━━ <highlight>%claim% <dark_gray>- <content>领地信息 <dark_gray>━━━━━━━━"
     - "<content>所有者: <highlight>%owner%"
+    - "<content>父领地: <highlight>%parent% <gray>| <content>深度: <highlight>%depth%"
     - "<content>你的权限组: <highlight>%group%"
+    - "<content>区域: <hover:show_text:'%areas%'><highlight>%area-count% <content>个</hover> <gray>| <content>范围: <highlight>%area-summary%"
+    - "<content>子领地: <hover:show_text:'%subclaims%'><highlight>%subclaim-count% <content>个</hover> <gray>| <content>Flag: <hover:show_text:'%flags%'><highlight>%flag-count% <content>项</hover>"
     - "<content>权限组: <hover:show_text:'%groups%'><highlight>%group-count% <content>个</hover> <gray>| <content>成员: <hover:show_text:'%members%'><highlight>%member-count% <content>人</hover>"
     - "<hover:show_text:'输入信任玩家命令'><click:suggest_command:/res trust ><content>[添加玩家]</click></hover> <hover:show_text:'输入权限设置命令'><click:suggest_command:/res set ><content>[设置权限]</click></hover>"
   list-message:
@@ -38,12 +41,16 @@ command:
     - "%prev% <gray>| %next%"
   format:
     no-areas: "无区域"
+    area-box: "(%min-x%, %min-y%, %min-z%) -> (%max-x%, %max-y%, %max-z%)"
     area-summary: "%count% 个区域，首个 %area%"
+    area-entry: "#%area-id% %area%"
     group-entry: "%group% (%weight%)"
     no-members: "暂无成员"
     member-entry: "%player% -> %group%"
     no-subclaims: "无子领地"
     subclaim-entry: "%claim% (%short-uuid%)"
+    no-flags: "暂无 Flag"
+    flag-entry: "%flag% = %value%"
     previous-page: "上一页"
     next-page: "下一页"
     page-enabled: "<hover:show_text:'点击翻页'><click:run_command:%command%><highlight>%label%</click></hover>"
@@ -52,7 +59,7 @@ command:
     console: "控制台"
     none: "无"
     parent-link: "<hover:show_text:'点击查看父领地'><click:run_command:/res info %uuid%>%claim%</click></hover>"
-    list-entry-hover: "点击查看详情"
+    list-entry-hover: "所有者: %owner%<newline>UUID: %uuid%<newline>范围: %area-summary%<newline>子领地: %subclaim-count% 个"
 
 claim:
   prohibited-action: "<error-highlight>%group-name% <error-content>没有权限 %permission%"
@@ -62,6 +69,11 @@ claim:
   action:
     block:
       break: "破坏 %material%"
+      place: "放置 %material%"
+      interact: "交互 %material%"
+    entity:
+      damage: "攻击 %material%"
+      interact: "交互 %material%"
 
   group:
     none: "访客"

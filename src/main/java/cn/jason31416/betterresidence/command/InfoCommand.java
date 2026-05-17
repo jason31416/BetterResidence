@@ -52,7 +52,9 @@ public class InfoCommand extends ChildCommand {
     }
 
     private Message createInfoMessage(ICommandContext context, Claim claim) {
+        List<ClaimManager.ClaimAreaInfo> areas = ClaimManager.fetchClaimAreas(claim.getUuid());
         List<ClaimManager.ClaimMemberInfo> members = ClaimManager.fetchClaimMembers(claim.getUuid());
+        List<ClaimManager.ClaimFlagInfo> flags = ClaimManager.fetchClaimFlags(claim.getUuid());
         Claim parent = claim.getParentUuid() == null ? null : ClaimManager.fetchClaim(claim.getParentUuid());
 
         String currentGroup = context.player() == null
@@ -70,12 +72,17 @@ public class InfoCommand extends ChildCommand {
                 .add("owner", ClaimCommandFormat.escape(claim.getOwner().getName()))
                 .add("parent", parentText)
                 .add("depth", claim.getDepth())
+                .add("area-count", areas.size())
+                .add("area-summary", ClaimCommandFormat.escape(ClaimCommandFormat.areaSummary(areas)))
+                .add("areas", ClaimCommandFormat.areaHover(areas))
                 .add("subclaim-count", claim.getSubClaims().size())
                 .add("subclaims", ClaimCommandFormat.subClaimHover(claim))
                 .add("group", ClaimCommandFormat.escape(currentGroup))
                 .add("group-count", claim.getClaimGroups().size())
                 .add("groups", ClaimCommandFormat.groupHover(claim))
                 .add("member-count", members.size())
-                .add("members", ClaimCommandFormat.memberHover(claim, members));
+                .add("members", ClaimCommandFormat.memberHover(claim, members))
+                .add("flag-count", flags.size())
+                .add("flags", ClaimCommandFormat.flagHover(flags));
     }
 }

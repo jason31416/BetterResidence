@@ -86,7 +86,7 @@ public class Claim {
         synchronized (areaCreateLock) {
             int areaId = allocateNextAreaId();
 
-            DataHandler.getDatabase().executeBatch(List.of(
+            DataHandler.executeBatch(List.of(
                     DataHandler.getDatabase().insert("area")
                             .value("id", areaId)
                             .value("minX", areaBox.minX())
@@ -94,11 +94,13 @@ public class Claim {
                             .value("minY", areaBox.minY())
                             .value("maxY", areaBox.maxY())
                             .value("minZ", areaBox.minZ())
-                            .value("maxZ", areaBox.maxZ()),
+                            .value("maxZ", areaBox.maxZ())
+                            .compile(),
                     DataHandler.getDatabase().insert("claim_areas")
                             .value("area_id", areaId)
                             .value("claim_uuid", uuid)
                             .value("world", worldUuid)
+                            .compile()
             ));
 
             ClaimAreaLookup.clearCache();

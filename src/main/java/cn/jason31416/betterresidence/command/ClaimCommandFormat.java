@@ -22,6 +22,7 @@ final class ClaimCommandFormat {
         }
         return value
                 .replace("\\", "\\\\")
+                .replace("'", "\\'")
                 .replace("<", "\\<")
                 .replace(">", "\\>");
     }
@@ -52,6 +53,18 @@ final class ClaimCommandFormat {
         return joinLimited(groups, Config.getInt("claim.info-group-hover-limit"));
     }
 
+    static String areaHover(List<ClaimManager.ClaimAreaInfo> areas) {
+        if (areas.isEmpty()) {
+            return raw("command.format.no-areas");
+        }
+        return joinLimited(areas.stream()
+                .map(area -> rawMessage("command.format.area-entry")
+                        .add("area-id", area.areaId())
+                        .add("area", formatAreaBox(area.box()))
+                        .toString())
+                .toList(), Config.getInt("claim.info-area-hover-limit"));
+    }
+
     static String memberHover(Claim claim, List<ClaimManager.ClaimMemberInfo> members) {
         if (members.isEmpty()) {
             return raw("command.format.no-members");
@@ -76,6 +89,18 @@ final class ClaimCommandFormat {
                         .toString())
                 .toList();
         return subClaims.isEmpty() ? raw("command.format.no-subclaims") : joinLimited(subClaims, Config.getInt("claim.info-subclaim-hover-limit"));
+    }
+
+    static String flagHover(List<ClaimManager.ClaimFlagInfo> flags) {
+        if (flags.isEmpty()) {
+            return raw("command.format.no-flags");
+        }
+        return joinLimited(flags.stream()
+                .map(flag -> rawMessage("command.format.flag-entry")
+                        .add("flag", escape(flag.flag()))
+                        .add("value", escape(flag.value()))
+                        .toString())
+                .toList(), Config.getInt("claim.info-flag-hover-limit"));
     }
 
     static String pageButton(String labelKey, String command, boolean enabled) {

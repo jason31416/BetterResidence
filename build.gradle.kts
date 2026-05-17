@@ -10,12 +10,17 @@ version = "1.0.0"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://jitpack.io") {
+        content {
+            includeGroup("com.github.jason31416")
+        }
+    }
     mavenLocal()
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    implementation("cn.jason31416:PlanetLib:1.4.1")
+    implementation("com.github.jason31416:planetlib:1.4.1")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
     implementation("org.xerial:sqlite-jdbc:3.46.0.0")

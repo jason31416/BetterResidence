@@ -1,14 +1,9 @@
 package cn.jason31416.betterresidence;
 
-import cn.jason31416.betterresidence.claim.ClaimManager;
 import cn.jason31416.betterresidence.claim.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.claim.TargetGroup;
-import cn.jason31416.betterresidence.claim.AreaBox;
-import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.message.MessageThemeManager;
 import cn.jason31416.planetlib.Required;
-import cn.jason31416.planetlib.message.MessageTheme;
-import cn.jason31416.planetlib.wrapper.SimplePlayer;
-import cn.jason31416.planetlib.wrapper.SimpleWorld;
 import cn.jason31416.planetlib.util.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 import cn.jason31416.planetlib.PlanetLib;
@@ -29,7 +24,7 @@ public final class BetterResidence extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        PlanetLib.initialize(this, Required.VAULT, Required.NBT, Required.PLACEHOLDERAPI);
+        PlanetLib.initialize(this, Required.NBT, Required.PLACEHOLDERAPI);
         try {
             reloadPluginConfig();
 
@@ -45,30 +40,6 @@ public final class BetterResidence extends JavaPlugin {
             PluginLogger.error("Found illegal config: "+e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
         }
-
-        // todo: Test
-        createTestClaim();
-    }
-
-    private void createTestClaim() {
-        String name = "test-claim";
-        boolean exists = DataHandler.getDatabase().select("claim")
-                .keyEquals("name", name)
-                .one()
-                .isPresent();
-        if (exists) {
-            return;
-        }
-
-        AreaBox ab = new AreaBox(-5, 50, 0, 300, -1000, 1000);
-
-        Claim claim = ClaimManager.createClaim(
-                SimplePlayer.of("HelloThere"),
-                name,
-                null,
-                SimpleWorld.defaultWorld(),
-                ab
-        );
     }
 
     public void reloadPluginConfig() {
@@ -76,8 +47,8 @@ public final class BetterResidence extends JavaPlugin {
 
         Util.saveFolder("lang");
         Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
-        MessageTheme.loadThemesFromFile("lang/theme.yml");
-        MessageTheme.useTheme(Config.getString("theme", "default"));
+        MessageThemeManager.loadThemesFromFile("lang/theme.yml");
+        MessageThemeManager.useTheme(Config.getString("theme", "default"));
         DefaultClaimGroupRegistry.loadConfig();
         TargetGroup.loadConfig();
     }

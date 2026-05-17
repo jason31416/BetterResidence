@@ -14,8 +14,10 @@ particle:
 
 claim:
   list-page-size: 8
+  info-area-hover-limit: 12
   info-group-hover-limit: 12
   info-member-hover-limit: 12
+  info-flag-hover-limit: 12
   info-subclaim-hover-limit: 12
 
   # Configured groups are global templates. Visitor is not configured here: it means no group
