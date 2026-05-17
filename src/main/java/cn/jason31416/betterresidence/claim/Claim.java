@@ -270,7 +270,7 @@ public class Claim {
         return claimGroups;
     }
 
-    private Optional<ClaimGroup> getClaimGroupById(String groupId) {
+    public Optional<ClaimGroup> getClaimGroupById(String groupId) {
         return getClaimGroups().stream()
                 .filter(group -> group.id().equals(groupId))
                 .findFirst();

@@ -13,6 +13,8 @@ public class BetterResidenceCommand extends RootCommand {
         new TrustCommand(this);
         new UntrustCommand(this);
         new SetCommand(this);
+        new InfoCommand(this);
+        new ListCommand(this);
     }
 
     @Override

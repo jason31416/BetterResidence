@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.claim;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
+import cn.jason31416.planetlib.data.Param;
 import cn.jason31416.planetlib.util.MapTree;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
@@ -10,6 +11,7 @@ import com.google.common.cache.CacheBuilder;
 import lombok.SneakyThrows;
 
 import javax.annotation.Nullable;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +40,75 @@ public class ClaimManager {
             SimplePlayer owner = SimplePlayer.of(UUID.fromString(data.getString("owner_uuid")));
             return new Claim(owner, data.getString("name"), uuid, data.getString("parent_uuid", null));
         });
+    }
+
+    @Nullable
+    public static Claim fetchClaimByName(String name) {
+        Optional<MapTree> row = DataHandler.getDatabase().select("claim")
+                .keyEquals("name", name)
+                .one();
+        return row.map(data -> fetchClaim(data.getString("uuid"))).orElse(null);
+    }
+
+    public static List<Claim> fetchClaimsByOwner(UUID ownerUuid) {
+        return DataHandler.getDatabase().select("claim")
+                .keyEquals("owner_uuid", ownerUuid.toString())
+                .list()
+                .stream()
+                .map(row -> fetchClaim(row.getString("uuid")))
+                .filter(claim -> claim != null)
+                .sorted(java.util.Comparator.comparing(Claim::getName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    public static List<ClaimAreaInfo> fetchClaimAreas(String claimUuid) {
+        return DataHandler.getDatabase().getSqlInstance().executeQuery(
+                """
+                SELECT claim_areas.area_id,
+                       claim_areas.world,
+                       area.minX,
+                       area.maxX,
+                       area.minY,
+                       area.maxY,
+                       area.minZ,
+                       area.maxZ
+                FROM claim_areas
+                JOIN area ON area.id = claim_areas.area_id
+                WHERE claim_areas.claim_uuid = ?
+                ORDER BY claim_areas.area_id ASC
+                """,
+                List.of(Param.of(claimUuid)),
+                ClaimManager::mapClaimAreaInfo
+        );
+    }
+
+    public static List<ClaimMemberInfo> fetchClaimMembers(String claimUuid) {
+        return DataHandler.getDatabase().select("player_groups")
+                .keyEquals("claim_uuid", claimUuid)
+                .list()
+                .stream()
+                .map(row -> new ClaimMemberInfo(
+                        SimplePlayer.of(UUID.fromString(row.getString("player_uuid"))),
+                        row.getString("group_id")
+                ))
+                .sorted(java.util.Comparator.comparing(member -> member.player().getName(), String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    @SneakyThrows
+    private static ClaimAreaInfo mapClaimAreaInfo(ResultSet rs) {
+        return new ClaimAreaInfo(
+                rs.getInt("area_id"),
+                rs.getString("world"),
+                new AreaBox(
+                        rs.getInt("minX"),
+                        rs.getInt("maxX"),
+                        rs.getInt("minY"),
+                        rs.getInt("maxY"),
+                        rs.getInt("minZ"),
+                        rs.getInt("maxZ")
+                )
+        );
     }
 
 
@@ -112,4 +183,11 @@ public class ClaimManager {
             return claim;
         }
     }
+
+    public record ClaimAreaInfo(int areaId, String worldUuid, AreaBox box) {
+    }
+
+    public record ClaimMemberInfo(SimplePlayer player, String groupId) {
+    }
+
 }
