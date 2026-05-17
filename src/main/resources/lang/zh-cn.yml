@@ -21,21 +21,34 @@ command:
   trust-success: "<content>已将 <highlight>%player% <content>加入领地 <highlight>%claim% <content>的 <highlight>%group% <content>权限组"
   untrust-success: "<content>已将 <highlight>%player% <content>从领地 <highlight>%claim% <content>的权限组中移除"
   set-permission-success: "<content>已将领地 <highlight>%claim% <content>中权限 <highlight>%permission% <content>的最低权限组设置为 <highlight>%group%"
+
   reload-success: "<highlight>BetterResidence <content>已重新加载"
   reload-failed: "<error-primary>错误: <error-content>BetterResidence 重新加载失败: <error-highlight>%error%"
+
+  create-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res create <领地名>"
+  create-no-selection: "<error-primary>错误: <error-content>请先用选区工具选择两个角落"
+  create-different-worlds: "<error-primary>错误: <error-content>两个选区点必须在同一个世界"
+  create-overlap: "<error-primary>错误: <error-content>选区与领地 <error-highlight>%conflict% <error-content>冲突"
+  create-max-claims: "<error-primary>错误: <error-content>你的领地数量已达到上限 <error-highlight>%max%"
+  create-not-enough-money: "<error-primary>错误: <error-content>金币不足，创建该领地需要 <error-highlight>%price%"
+  create-name-exists: "<error-primary>错误: <error-content>领地 <error-highlight>%claim% <error-content>已存在"
+  create-unavailable: "<error-primary>错误: <error-content>当前选区不能创建领地"
+  create-success: "<content>已创建领地 <highlight>%claim%<content>，大小 <highlight>%size% <content>方块，花费 <highlight>%price%"
+
   info-message:
-    - "<dark_gray>━━━━━━━━ <highlight>%claim% <dark_gray>- <content>领地信息 <dark_gray>━━━━━━━━"
-    - "<content>所有者: <highlight>%owner%"
-    - "<content>你的权限组: <highlight>%group%"
-    - "<content>权限组: <hover:show_text:'%groups%'><highlight>%group-count% <content>个</hover> <gray>| <content>成员: <hover:show_text:'%members%'><highlight>%member-count% <content>人</hover>"
+    - "<dark_gray>======== <highlight>%claim% <muted>- 领地信息 <dark_gray>========"
+    - "<muted>所有者: <highlight>%owner%"
+    - "<muted>你的权限组: <highlight>%group%"
+    - "<muted>权限组: <hover:show_text:'%groups%'><highlight>%group-count% <muted>个</hover> <muted>| 成员: <hover:show_text:'%members%'><highlight>%member-count%</hover>"
     - "<hover:show_text:'输入信任玩家命令'><click:suggest_command:/res trust ><content>[添加玩家]</click></hover> <hover:show_text:'输入权限设置命令'><click:suggest_command:/res set ><content>[设置权限]</click></hover>"
   list-message:
-    - "<dark_gray>━━━━━━━━ <highlight>%player% 的领地 <dark_gray>━━━━━━━━"
+    - "<dark_gray>======== <highlight>%player% <muted>的领地 <dark_gray>========"
     - "<content>共 <highlight>%count% <content>个领地"
-  list-entry: "<content>- <hover:show_text:'%hover%'><click:run_command:/res info %uuid%><highlight>%claim%</click></hover>"
+  list-entry: "<muted>- <hover:show_text:'%hover%'><click:run_command:/res info %uuid%><highlight>%claim%</click></hover>"
   list-footer:
     - "第 <highlight>%page%<content>/<highlight>%page-count% <content>页"
-    - "%prev% <gray>| %next%"
+    - "%prev% <muted>| %next%"
+
   format:
     no-areas: "无区域"
     area-summary: "%count% 个区域，首个 %area%"
@@ -58,6 +71,17 @@ claim:
   prohibited-action: "<error-highlight>%group-name% <error-content>没有权限 %permission%"
   entered: "<content>欢迎进入 <highlight>%owner% <content>的领地 <highlight>%claim%"
   left: "<content>已离开领地 <highlight>%claim%"
+  selection:
+    position-1-set: "<content>点1已设置"
+    position-2-set: "<content>点2已设置"
+    missing-position-1: "<content>左键选择点1"
+    missing-position-2: "<content>右键选择点2"
+    available: "<yellow>/res create <领地名> <muted>| <highlight>$%price% <content>(%size% 方块)"
+    different-worlds: "<error-content>不同世界"
+    overlap: "<error-content>冲突 <error-highlight>%conflict%"
+    max-claims: "<error-content>领地数量上限 <error-highlight>%max%"
+    not-enough-money: "<error-content>金币不足 <error-highlight>$%price% <content>(%size% 方块)"
+    unavailable: "<error-content>不可创建"
 
   action:
     block:

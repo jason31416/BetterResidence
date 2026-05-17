@@ -61,6 +61,91 @@ public class ClaimManager {
                 .toList();
     }
 
+    public static boolean claimNameExists(String name) {
+        return DataHandler.getDatabase().select("claim")
+                .keyEquals("name", name)
+                .one()
+                .isPresent();
+    }
+
+    public static List<OverlappingClaimAreaInfo> fetchOverlappingClaimAreas(String worldUuid, AreaBox areaBox) {
+        return DataHandler.getDatabase().getSqlInstance().executeQuery(
+                """
+                SELECT claim_areas.area_id,
+                       claim_areas.world,
+                       area.minX,
+                       area.maxX,
+                       area.minY,
+                       area.maxY,
+                       area.minZ,
+                       area.maxZ,
+                       claim.name AS claim_name,
+                       claim.uuid AS claim_uuid
+                FROM claim_areas
+                JOIN area ON area.id = claim_areas.area_id
+                JOIN claim ON claim.uuid = claim_areas.claim_uuid
+                WHERE area.minX <= ?
+                  AND area.maxX >= ?
+                  AND area.minY <= ?
+                  AND area.maxY >= ?
+                  AND area.minZ <= ?
+                  AND area.maxZ >= ?
+                  AND claim_areas.world = ?
+                ORDER BY claim_areas.area_id ASC
+                """,
+                List.of(
+                        Param.of(areaBox.maxX()),
+                        Param.of(areaBox.minX()),
+                        Param.of(areaBox.maxY()),
+                        Param.of(areaBox.minY()),
+                        Param.of(areaBox.maxZ()),
+                        Param.of(areaBox.minZ()),
+                        Param.of(worldUuid)
+                ),
+                ClaimManager::mapOverlappingClaimAreaInfo
+        );
+    }
+
+    public static List<OverlappingClaimAreaInfo> fetchClaimAreasNear(String worldUuid, AreaBox areaBox, int limit) {
+        return DataHandler.getDatabase().getSqlInstance().executeQuery(
+                """
+                SELECT claim_areas.area_id,
+                       claim_areas.world,
+                       area.minX,
+                       area.maxX,
+                       area.minY,
+                       area.maxY,
+                       area.minZ,
+                       area.maxZ,
+                       claim.name AS claim_name,
+                       claim.uuid AS claim_uuid
+                FROM claim_areas
+                JOIN area ON area.id = claim_areas.area_id
+                JOIN claim ON claim.uuid = claim_areas.claim_uuid
+                WHERE area.minX <= ?
+                  AND area.maxX >= ?
+                  AND area.minY <= ?
+                  AND area.maxY >= ?
+                  AND area.minZ <= ?
+                  AND area.maxZ >= ?
+                  AND claim_areas.world = ?
+                ORDER BY claim_areas.area_id ASC
+                LIMIT ?
+                """,
+                List.of(
+                        Param.of(areaBox.maxX()),
+                        Param.of(areaBox.minX()),
+                        Param.of(areaBox.maxY()),
+                        Param.of(areaBox.minY()),
+                        Param.of(areaBox.maxZ()),
+                        Param.of(areaBox.minZ()),
+                        Param.of(worldUuid),
+                        Param.of(Math.max(1, limit))
+                ),
+                ClaimManager::mapOverlappingClaimAreaInfo
+        );
+    }
+
     public static List<ClaimAreaInfo> fetchClaimAreas(String claimUuid) {
         return DataHandler.getDatabase().getSqlInstance().executeQuery(
                 """
@@ -108,6 +193,24 @@ public class ClaimManager {
                         rs.getInt("minZ"),
                         rs.getInt("maxZ")
                 )
+        );
+    }
+
+    @SneakyThrows
+    private static OverlappingClaimAreaInfo mapOverlappingClaimAreaInfo(ResultSet rs) {
+        return new OverlappingClaimAreaInfo(
+                rs.getInt("area_id"),
+                rs.getString("world"),
+                new AreaBox(
+                        rs.getInt("minX"),
+                        rs.getInt("maxX"),
+                        rs.getInt("minY"),
+                        rs.getInt("maxY"),
+                        rs.getInt("minZ"),
+                        rs.getInt("maxZ")
+                ),
+                rs.getString("claim_uuid"),
+                rs.getString("claim_name")
         );
     }
 
@@ -185,6 +288,9 @@ public class ClaimManager {
     }
 
     public record ClaimAreaInfo(int areaId, String worldUuid, AreaBox box) {
+    }
+
+    public record OverlappingClaimAreaInfo(int areaId, String worldUuid, AreaBox box, String claimUuid, String claimName) {
     }
 
     public record ClaimMemberInfo(SimplePlayer player, String groupId) {

@@ -61,6 +61,10 @@ public class ListCommand extends ChildCommand {
             message.add(createListEntry(claim));
         }
         Lang.getMessageList("command.list-footer")
+                .add("player", ClaimCommandFormat.escape(owner.getName()))
+                .add("count", claims.size())
+                .add("page", page)
+                .add("page-count", pageCount)
                 .add("prev", ClaimCommandFormat.pageButton("command.format.previous-page", "/res list " + owner.getName() + " " + (page - 1), page > 1))
                 .add("next", ClaimCommandFormat.pageButton("command.format.next-page", "/res list " + owner.getName() + " " + (page + 1), page < pageCount))
                 .getContent()

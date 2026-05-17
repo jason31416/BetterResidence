@@ -1,22 +1,25 @@
-# BetterResidence Configuration
-version: "1.0"
-
 # Language setting
 # Place language files in lang/ folder (e.g., lang/en-us.yml)
 lang: "zh-cn"
 
-# Message Color Theme
-# Refer to the theme set in lang/theme.yml
+# Message Color Theme. Refer to the themes in lang/theme.yml.
 theme: "default"
 
-particle:
-  range: 16
+
 
 claim:
+  # Maximum top-level claims each player can own. Use -1 for no limit.
+  max-claims-per-player: -1
   list-page-size: 8
   info-group-hover-limit: 12
   info-member-hover-limit: 12
   info-subclaim-hover-limit: 12
+
+  create:
+    # Material used to select two claim corners with left/right click.
+    selection-tool: "WOODEN_HOE"
+    # Claim creation price per selected block.
+    price-per-block: 1.0
 
   # Configured groups are global templates. Visitor is not configured here: it means no group
   # record and always has weight 0. "claim.group.everyone" is only a /res set alias for -1000.
@@ -39,3 +42,50 @@ claim:
     owner-only-admin: # By default, only owner should be able to grant/revoke permission and edit claim settings.
       permission: "admin"
       weight: 1000
+
+# Visualizer settings control particle-based area previews.
+visualizer:
+  # Maximum distance from a player where visualizer particles are rendered.
+  range: 16
+
+  # Visualizer colors for the claim creation selection preview.
+  # Colors use "red,green,blue" RGB values from 0 to 255.
+  create-claim:
+    # Selection is valid and /res create can create the claim.
+    available:
+      frame-color: "80,220,120"
+      side-color: "120,240,150"
+    # Selection is complete but blocked by non-conflict limits, such as money or claim count.
+    limited:
+      frame-color: "230,200,60"
+      side-color: "245,220,100"
+    # Selection overlaps an existing claim.
+    conflict:
+      frame-color: "230,70,70"
+      side-color: "245,110,100"
+
+  # Automatically display nearby claims while the player is holding the claim selection tool.
+  nearby-claims:
+    enabled: true
+    # [Performance] Search radius used for the database bounds query. This should usually be slightly larger than visualizer.range.
+    query-range: 48
+    # [Performance] Minimum time between nearby-claim database refreshes per player.
+    refresh-millis: 2000
+    # [Performance] Player movement required before a nearby-claim refresh can happen before refresh-millis expires.
+    refresh-distance: 8.0
+    # [Performance] Hard cap for how many claim areas one player can auto-display at once.
+    max-areas-per-player: 32
+
+    frame-color: "90,170,255"
+    side-color: "120,190,255"
+
+  # Briefly display claim borders when a player enters or leaves a claim.
+  claim-flash:
+    enabled: true
+    # How long should the particles last
+    duration-millis: 300
+    frame-color: "90,170,255"
+    side-color: "120,190,255"
+
+# BetterResidence Configuration version, do not edit.
+version: "1.0"

@@ -43,6 +43,10 @@ public class AreaBoxVisualizer {
         boxes.clear();
     }
 
+    public void removeBox(RenderedAreaBox box) {
+        boxes.remove(box);
+    }
+
     public void destroy() {
         if (task != null) {
             task.cancel();
@@ -62,7 +66,7 @@ public class AreaBoxVisualizer {
         }
 
         World playerWorld = player.getWorld();
-        RenderWindow window = RenderWindow.around(player.getLocation(), Math.max(1, Config.getInt("particle.range", DEFAULT_RANGE)));
+        RenderWindow window = RenderWindow.around(player.getLocation(), Math.max(1, getRenderRange()));
 
         for (RenderedAreaBox box : boxes) {
             if (!box.isRenderableIn(playerWorld, window)) {
@@ -79,6 +83,13 @@ public class AreaBoxVisualizer {
             return origin;
         }
         return origin + Math.ceil((min - origin) / spacing) * spacing;
+    }
+
+    private static int getRenderRange() {
+        if (Config.contains("visualizer.range")) {
+            return Config.getInt("visualizer.range");
+        }
+        return Config.getInt("particle.range", DEFAULT_RANGE);
     }
 
     private record RenderWindow(double minX, double maxX, double minY, double maxY, double minZ, double maxZ) {

@@ -34,4 +34,8 @@ public record AreaBox(int minX, int maxX, int minY, int maxY, int minZ, int maxZ
                 && minZ <= other.maxZ
                 && maxZ >= other.minZ;
     }
+
+    public long volume() {
+        return ((long) maxX - minX + 1) * ((long) maxY - minY + 1) * ((long) maxZ - minZ + 1);
+    }
 }

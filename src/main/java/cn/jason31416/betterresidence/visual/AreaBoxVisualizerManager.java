@@ -56,6 +56,16 @@ public class AreaBoxVisualizerManager {
     }
 
     /**
+     * Remove one registered box without affecting other boxes owned by the same player.
+     */
+    public static void removeBox(Player player, AreaBoxVisualizer.RenderedAreaBox box) {
+        AreaBoxVisualizer visualizer = VISUALIZERS.get(player.getUniqueId());
+        if (visualizer != null) {
+            visualizer.removeBox(box);
+        }
+    }
+
+    /**
      * Remove all boxes from the player's visualizer without destroying the visualizer task.
      *
      * @param player The player whose visible boxes should be cleared.
