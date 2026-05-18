@@ -35,6 +35,18 @@ command:
   create-unavailable: "<error-primary>错误: <error-content>当前选区不能创建领地"
   create-success: "<content>已创建领地 <highlight>%claim%<content>，大小 <highlight>%size% <content>方块，花费 <highlight>%price%"
 
+  remove-no-pending: "<error-primary>错误: <error-content>没有待确认的删除操作，请先输入 <error-highlight>/res remove"
+  remove-expired: "<error-primary>错误: <error-content>删除确认已过期，请重新输入 <error-highlight>/res remove"
+  remove-success: "<content>已删除领地 <highlight>%claim%<content>，<highlight>%promoted-count% <content>个直接子领地已升级到 <highlight>%parent%"
+  remove-confirm-message:
+    - "<dark_gray>======== <error-highlight>删除领地确认 <dark_gray>========"
+    - "<muted>领地: <highlight>%claim% <dark_gray>(%short-uuid%)"
+    - "<muted>区域: <highlight>%area-summary%"
+    - "<muted>直接子领地: <highlight>%subclaim-count% <muted>个"
+    - "<error-content>此操作不可撤销。请在 <error-highlight>%seconds% <error-content>秒内确认。"
+    - "%confirm%"
+  remove-confirm-button: "<hover:show_text:'确认删除该领地，此操作不可撤销'><click:run_command:%command%><error-highlight>[确认删除]</click></hover>"
+
   info-message:
     - "<dark_gray>======== <highlight>%claim% <muted>- 领地信息 <dark_gray>========"
     - "<muted>所有者: <highlight>%owner%"

@@ -12,6 +12,7 @@ import lombok.SneakyThrows;
 
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,6 +67,14 @@ public class ClaimManager {
                 .keyEquals("name", name)
                 .one()
                 .isPresent();
+    }
+
+    public static void invalidateClaim(String uuid) {
+        claimCache.invalidate(uuid);
+    }
+
+    public static void invalidateClaims(Collection<String> uuids) {
+        claimCache.invalidateAll(uuids);
     }
 
     public static List<OverlappingClaimAreaInfo> fetchOverlappingClaimAreas(String worldUuid, AreaBox areaBox) {

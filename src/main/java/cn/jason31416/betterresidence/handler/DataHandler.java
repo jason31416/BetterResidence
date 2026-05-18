@@ -19,6 +19,7 @@ public class DataHandler {
         File dbFile = new File(dataFolder, "database.db");
 
         database = Database.createSqlite(dbFile);
+        configureSqliteForReadHeavyWorkload();
 
         database.getSqlInstance().execute("CREATE VIRTUAL TABLE IF NOT EXISTS area USING rtree_i32(id, minX, maxX, minY, maxY, minZ, maxZ);", List.of());
         database.registerTable(new TableSchema("claim")
@@ -57,10 +58,23 @@ public class DataHandler {
         database.initializeSchema();
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_world_area ON claim_areas(world, area_id);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_claim_uuid ON claim_areas(claim_uuid);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_name ON claim(name);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_owner_uuid ON claim(owner_uuid);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_parent_uuid ON claim(parent_uuid);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_player_groups_claim_uuid ON player_groups(claim_uuid);", List.of());
+        database.getSqlInstance().execute("PRAGMA optimize;", List.of());
+    }
+
+    private static void configureSqliteForReadHeavyWorkload() {
+        database.getSqlInstance().execute("PRAGMA journal_mode=WAL;", List.of());
+        database.getSqlInstance().execute("PRAGMA synchronous=NORMAL;", List.of());
+        database.getSqlInstance().execute("PRAGMA busy_timeout=5000;", List.of());
+        database.getSqlInstance().execute("PRAGMA temp_store=MEMORY;", List.of());
+        database.getSqlInstance().execute("PRAGMA cache_size=-20000;", List.of());
     }
 
     public static void close() {
+        getDatabase().getSqlInstance().execute("PRAGMA optimize;", List.of());
         getDatabase().getSqlInstance().close();
     }
 }

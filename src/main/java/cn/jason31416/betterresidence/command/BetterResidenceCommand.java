@@ -16,6 +16,7 @@ public class BetterResidenceCommand extends RootCommand {
         new InfoCommand(this);
         new ListCommand(this);
         new CreateCommand(this);
+        new RemoveCommand(this);
     }
 
     @Override

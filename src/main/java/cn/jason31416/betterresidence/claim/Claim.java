@@ -123,6 +123,57 @@ public class Claim {
         return subClaims;
     }
 
+    /**
+     * Remove this claim and all data directly owned by it. Direct subclaims are promoted to this claim's parent.
+     */
+    @SneakyThrows
+    public void remove() {
+        List<Integer> areaIds = ClaimManager.fetchClaimAreas(uuid).stream()
+                .map(ClaimManager.ClaimAreaInfo::areaId)
+                .toList();
+        List<String> promotedSubclaims = new ArrayList<>(getSubClaims());
+
+        DataHandler.getDatabase().update("claim")
+                .value("parent_uuid", parentUuid)
+                .keyEquals("parent_uuid", uuid)
+                .executeUpdate();
+        DataHandler.getDatabase().delete("claim_permissions")
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+        DataHandler.getDatabase().delete("group_weights")
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+        DataHandler.getDatabase().delete("player_groups")
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+        DataHandler.getDatabase().delete("claim_flags")
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+        DataHandler.getDatabase().delete("claim_areas")
+                .keyEquals("claim_uuid", uuid)
+                .executeUpdate();
+        for (int areaId : areaIds) {
+            DataHandler.getDatabase().delete("area")
+                    .keyEquals("id", areaId)
+                    .executeUpdate();
+        }
+        DataHandler.getDatabase().delete("claim")
+                .keyEquals("uuid", uuid)
+                .executeUpdate();
+
+        ClaimManager.invalidateClaim(uuid);
+        ClaimManager.invalidateClaims(promotedSubclaims);
+        if (parentUuid != null) {
+            ClaimManager.invalidateClaim(parentUuid);
+        }
+        ClaimAreaLookup.clearCache();
+
+        playerGroupCache.clear();
+        permissionNodes = null;
+        claimFlags = null;
+        subClaims = null;
+    }
+
     // --------- Flag system ------------
 
     /**

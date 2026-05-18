@@ -41,8 +41,6 @@ claim:
       permission: "admin"
       weight: 1000
 
-
-
 # Visualizer settings control particle-based area previews.
 visualizer:
   # [Performance] Maximum distance from a player where visualizer particles are rendered.
