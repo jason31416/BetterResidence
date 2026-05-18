@@ -9,6 +9,10 @@ claim:
   # Maximum top-level claims each player can own. Use -1 for no limit.
   # The plugin can handle millions of claims with reasonable performance, so you don't have to limit this for performance.
   max-claims-per-player: -1
+  # Maximum direct subclaims each claim can have. Use -1 for no limit.
+  max-subclaims-per-claim: -1
+  # Maximum subclaim depth. Top-level claims are depth 0. Use -1 for no limit.
+  max-subclaim-depth: 3
 
   create:
     # Material used to select two claim corners with left/right click.

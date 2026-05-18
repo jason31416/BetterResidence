@@ -16,8 +16,10 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -76,13 +78,13 @@ public class AreaCommand extends ChildCommand {
 
         Player player = context.player().getPlayer();
         SelectionManager.Selection selection = SelectionManager.getSelection(player);
-        AreaValidationResult result = validateSelectedArea(player, selection);
+        AreaValidationResult result = validateSelectedArea(claim, player, selection);
         if (!result.valid()) {
             return createAreaAddValidationError(result);
         }
 
         SimplePlayer owner = SimplePlayer.of(player);
-        if (owner.getBalance() < result.price() || !owner.withdrawBalance(result.price())) {
+        if (result.price() > 0D && (owner.getBalance() < result.price() || !owner.withdrawBalance(result.price()))) {
             return Lang.getMessage("command.area-add-not-enough-money").copy()
                     .add("price", formatPrice(result.price()))
                     .add("size", result.size());
@@ -90,7 +92,8 @@ public class AreaCommand extends ChildCommand {
 
         claim.createArea(result.world().getUID().toString(), result.areaBox());
         SelectionManager.clearSelection(player);
-        return Lang.getMessage("command.area-add-success").copy()
+        String successKey = claim.getParentUuid() == null ? "command.area-add-success" : "command.area-add-subclaim-success";
+        return Lang.getMessage(successKey).copy()
                 .add("claim", ClaimCommandFormat.escape(claim.getName()))
                 .add("price", formatPrice(result.price()))
                 .add("size", result.size());
@@ -123,6 +126,7 @@ public class AreaCommand extends ChildCommand {
         ));
 
         return Lang.getMessageList("command.area-remove-confirm-message")
+                .copy()
                 .add("claim", ClaimCommandFormat.escape(areaAtPlayer.claim().getName()))
                 .add("area", ClaimCommandFormat.areaBox(areaAtPlayer.area().box()))
                 .add("seconds", TimeUnit.MILLISECONDS.toSeconds(CONFIRM_TIMEOUT_MILLIS))
@@ -197,6 +201,7 @@ public class AreaCommand extends ChildCommand {
                 .toList();
 
         return Lang.getMessageList("command.area-list-message")
+                .copy()
                 .add("claim", ClaimCommandFormat.escape(claim.getName()))
                 .add("count", entries.size())
                 .add("areas", entries.isEmpty()
@@ -239,7 +244,7 @@ public class AreaCommand extends ChildCommand {
         return null;
     }
 
-    private AreaValidationResult validateSelectedArea(Player player, SelectionManager.Selection selection) {
+    private AreaValidationResult validateSelectedArea(Claim claim, Player player, SelectionManager.Selection selection) {
         if (!selection.isComplete()) {
             return AreaValidationResult.invalid(AreaValidationReason.INCOMPLETE_SELECTION, null, null, 0L, 0D);
         }
@@ -254,12 +259,24 @@ public class AreaCommand extends ChildCommand {
         }
 
         long size = areaBox.volume();
-        double price = size * Math.max(0D, Config.getDouble("claim.create.price-per-block"));
+        boolean subclaimArea = claim.getParentUuid() != null;
+        double price = subclaimArea ? 0D : size * Math.max(0D, Config.getDouble("claim.create.price-per-block"));
+        if (subclaimArea && !ClaimManager.isAreaCoveredByClaim(claim.getParentUuid(), world.getUID().toString(), areaBox)) {
+            return AreaValidationResult.invalid(AreaValidationReason.OUTSIDE_PARENT, areaBox, world, size, price);
+        }
+
         List<ClaimManager.OverlappingClaimAreaInfo> overlappingAreas = ClaimManager.fetchOverlappingClaimAreas(world.getUID().toString(), areaBox);
-        if (!overlappingAreas.isEmpty()) {
+        if (subclaimArea) {
+            Set<String> allowedAncestorUuids = new HashSet<>(ClaimManager.fetchAncestorClaimUuids(claim.getUuid()));
+            boolean hasDisallowedOverlap = overlappingAreas.stream()
+                    .anyMatch(area -> !allowedAncestorUuids.contains(area.claimUuid()));
+            if (hasDisallowedOverlap) {
+                return AreaValidationResult.invalid(AreaValidationReason.OVERLAP, areaBox, world, size, price, createConflictText(overlappingAreas));
+            }
+        } else if (!overlappingAreas.isEmpty()) {
             return AreaValidationResult.invalid(AreaValidationReason.OVERLAP, areaBox, world, size, price, createConflictText(overlappingAreas));
         }
-        if (SimplePlayer.of(player).getBalance() < price) {
+        if (price > 0D && SimplePlayer.of(player).getBalance() < price) {
             return AreaValidationResult.invalid(AreaValidationReason.NOT_ENOUGH_MONEY, areaBox, world, size, price);
         }
 
@@ -270,6 +287,7 @@ public class AreaCommand extends ChildCommand {
         String key = switch (result.reason()) {
             case INCOMPLETE_SELECTION -> "command.area-add-no-selection";
             case DIFFERENT_WORLDS -> "command.area-add-different-worlds";
+            case OUTSIDE_PARENT -> "command.area-add-outside-parent";
             case OVERLAP -> "command.area-add-overlap";
             case NOT_ENOUGH_MONEY -> "command.area-add-not-enough-money";
             default -> "command.area-add-unavailable";
@@ -302,6 +320,7 @@ public class AreaCommand extends ChildCommand {
         NONE,
         INCOMPLETE_SELECTION,
         DIFFERENT_WORLDS,
+        OUTSIDE_PARENT,
         OVERLAP,
         NOT_ENOUGH_MONEY
     }

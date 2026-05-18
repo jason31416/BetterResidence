@@ -175,21 +175,33 @@ public class GeneralEventListener implements Listener {
         if (!selection.isComplete()) {
             return;
         } else if (result.valid()) {
-            key = "claim.selection.available";
+            key = result.creationType() == ClaimCreationValidator.CreationType.SUBCLAIM
+                    ? "claim.selection.subclaim-available"
+                    : "claim.selection.available";
         } else {
             key = switch (result.reason()) {
                 case DIFFERENT_WORLDS -> "claim.selection.different-worlds";
                 case OVERLAP -> "claim.selection.overlap";
+                case PARTIAL_OVERLAP -> "claim.selection.partial-overlap";
+                case NO_PARENT_ADMIN -> "claim.selection.no-parent-admin";
                 case MAX_CLAIMS -> "claim.selection.max-claims";
+                case MAX_SUBCLAIMS -> "claim.selection.max-subclaims";
+                case MAX_SUBCLAIM_DEPTH -> "claim.selection.max-subclaim-depth";
                 case NOT_ENOUGH_MONEY -> "claim.selection.not-enough-money";
+                case SUBCLAIM_OVERLAP -> "claim.selection.subclaim-overlap";
                 default -> "claim.selection.unavailable";
             };
         }
 
+        // The same selection preview now represents two creation modes. Top-level claims show price,
+        // while subclaims show the resolved parent claim because they are free but permission-limited.
         Lang.getMessage(key).copy()
                 .add("size", result.size())
                 .add("price", formatPrice(result.price()))
                 .add("max", Config.getInt("claim.max-claims-per-player"))
+                .add("max-subclaims", Config.getInt("claim.max-subclaims-per-claim"))
+                .add("max-depth", Config.getInt("claim.max-subclaim-depth"))
+                .add("parent", result.parentClaim() == null ? "" : result.parentClaim().getName())
                 .add("conflict", result.conflict())
                 .sendActionbar(player);
     }

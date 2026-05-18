@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.command;
 
 import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.claim.Claim;
 import cn.jason31416.betterresidence.selection.ClaimCreationValidator;
 import cn.jason31416.betterresidence.selection.SelectionManager;
 import cn.jason31416.planetlib.command.ChildCommand;
@@ -43,15 +44,36 @@ public class CreateCommand extends ChildCommand {
         }
 
         SimplePlayer owner = SimplePlayer.of(player);
-        // Re-checking immediately before withdrawal keeps command execution safe even if preview state is stale.
-        if (owner.getBalance() < result.price() || !owner.withdrawBalance(result.price())) {
-            return Lang.getMessage("command.create-not-enough-money").copy()
-                    .add("price", formatPrice(result.price()))
-                    .add("size", result.size());
+        if (result.creationType() == ClaimCreationValidator.CreationType.TOP_LEVEL) {
+            // Only top-level claims are paid creations. Subclaims are spatial subdivisions inside an
+            // already-owned/administered claim, so they skip money checks and player top-level limits.
+            if (owner.getBalance() < result.price() || !owner.withdrawBalance(result.price())) {
+                return Lang.getMessage("command.create-not-enough-money").copy()
+                        .add("price", formatPrice(result.price()))
+                        .add("size", result.size());
+            }
         }
 
-        ClaimManager.createClaim(owner, claimName, null, SimpleWorld.of(result.world()), result.areaBox());
+        Claim parent = result.parentClaim();
+        Claim createdClaim = ClaimManager.createClaim(
+                owner,
+                claimName,
+                parent == null ? null : parent.getUuid(),
+                SimpleWorld.of(result.world()),
+                result.areaBox()
+        );
+        if (parent != null) {
+            // Subclaims do not inherit permissions or members, but flags are copied once at creation
+            // so environmental/messages settings start consistent with the parent and can diverge later.
+            ClaimManager.copyClaimFlags(parent.getUuid(), createdClaim.getUuid());
+        }
         SelectionManager.clearSelection(player);
+        if (parent != null) {
+            return Lang.getMessage("command.create-subclaim-success").copy()
+                    .add("claim", claimName)
+                    .add("parent", parent.getName())
+                    .add("size", result.size());
+        }
         return Lang.getMessage("command.create-success").copy()
                 .add("claim", claimName)
                 .add("price", formatPrice(result.price()))
@@ -68,14 +90,22 @@ public class CreateCommand extends ChildCommand {
             case INCOMPLETE_SELECTION -> "command.create-no-selection";
             case DIFFERENT_WORLDS -> "command.create-different-worlds";
             case OVERLAP -> "command.create-overlap";
+            case PARTIAL_OVERLAP -> "command.create-partial-overlap";
+            case NO_PARENT_ADMIN -> "command.create-no-parent-admin";
             case MAX_CLAIMS -> "command.create-max-claims";
+            case MAX_SUBCLAIMS -> "command.create-max-subclaims";
+            case MAX_SUBCLAIM_DEPTH -> "command.create-max-subclaim-depth";
             case NOT_ENOUGH_MONEY -> "command.create-not-enough-money";
+            case SUBCLAIM_OVERLAP -> "command.create-subclaim-overlap";
             default -> "command.create-unavailable";
         };
         return Lang.getMessage(key).copy()
                 .add("price", formatPrice(result.price()))
                 .add("size", result.size())
                 .add("max", Config.getInt("claim.max-claims-per-player"))
+                .add("max-subclaims", Config.getInt("claim.max-subclaims-per-claim"))
+                .add("max-depth", Config.getInt("claim.max-subclaim-depth"))
+                .add("parent", result.parentClaim() == null ? "" : result.parentClaim().getName())
                 .add("conflict", result.conflict());
     }
 

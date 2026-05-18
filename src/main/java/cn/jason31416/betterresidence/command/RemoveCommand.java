@@ -87,6 +87,7 @@ public class RemoveCommand extends ClaimAdminCommand {
     private Message createConfirmMessage(Claim claim) {
         List<ClaimManager.ClaimAreaInfo> areas = ClaimManager.fetchClaimAreas(claim.getUuid());
         return Lang.getMessageList("command.remove-confirm-message")
+                .copy()
                 .add("claim", ClaimCommandFormat.escape(claim.getName()))
                 .add("uuid", claim.getUuid())
                 .add("short-uuid", ClaimCommandFormat.shortUuid(claim.getUuid()))

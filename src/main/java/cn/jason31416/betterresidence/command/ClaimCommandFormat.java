@@ -6,6 +6,8 @@ import cn.jason31416.betterresidence.claim.ClaimManager;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -85,10 +87,34 @@ final class ClaimCommandFormat {
                 .filter(subClaim -> subClaim != null)
                 .map(subClaim -> rawMessage("command.format.subclaim-entry")
                         .add("claim", subClaim.getName())
-                        .add("short-uuid", shortUuid(subClaim.getUuid()))
-                        .toString())
+                        .add("uuid", subClaim.getUuid())
+                        .toFormatted())
                 .toList();
-        return subClaims.isEmpty() ? raw("command.format.no-subclaims") : joinLimited(subClaims, INFO_SUBCLAIM_HOVER_LIMIT);
+        return subClaims.isEmpty() ? raw("command.format.no-subclaims") : joinLimitedInline(subClaims, INFO_SUBCLAIM_HOVER_LIMIT);
+    }
+
+    static String parentPath(Claim claim) {
+        List<Claim> ancestors = new ArrayList<>();
+        Claim current = claim;
+        while (current.getParentUuid() != null) {
+            Claim parent = ClaimManager.fetchClaim(current.getParentUuid());
+            if (parent == null) {
+                break;
+            }
+            ancestors.add(parent);
+            current = parent;
+        }
+        if (ancestors.isEmpty()) {
+            return raw("command.format.none");
+        }
+
+        Collections.reverse(ancestors);
+        return String.join("<muted>.<highlight>", ancestors.stream()
+                .map(parent -> rawMessage("command.format.parent-path-entry")
+                        .add("uuid", parent.getUuid())
+                        .add("claim", escape(parent.getName()))
+                        .toFormatted())
+                .toList());
     }
 
     static String pageButton(String labelKey, String command, boolean enabled) {
@@ -117,10 +143,24 @@ final class ClaimCommandFormat {
             return "";
         }
         List<String> visibleLines = lines.size() > limit ? lines.subList(0, limit) : lines;
-        String result = String.join("<newline>", visibleLines.stream().map(ClaimCommandFormat::escape).toList());
+        String result = String.join("<newline>", visibleLines);
         if (lines.size() > limit) {
             result += "<newline>" + rawMessage("command.format.more-items")
                     .add("count", lines.size() - limit)
+                    .toString();
+        }
+        return result;
+    }
+
+    private static String joinLimitedInline(List<String> items, int limit) {
+        if (items.isEmpty()) {
+            return "";
+        }
+        List<String> visibleItems = items.size() > limit ? items.subList(0, limit) : items;
+        String result = String.join("<muted>, <content>", visibleItems);
+        if (items.size() > limit) {
+            result += "<muted>, <content>" + rawMessage("command.format.more-items")
+                    .add("count", items.size() - limit)
                     .toString();
         }
         return result;

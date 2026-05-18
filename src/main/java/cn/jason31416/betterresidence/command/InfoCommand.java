@@ -7,6 +7,7 @@ import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
+import cn.jason31416.planetlib.util.PluginLogger;
 
 import java.util.List;
 
@@ -35,7 +36,10 @@ public class InfoCommand extends ChildCommand {
             }
         }
 
-        return createInfoMessage(context, claim);
+        Message msg = createInfoMessage(context, claim);
+
+//        PluginLogger.send(msg);
+        return msg;
     }
 
     @Override
@@ -52,24 +56,17 @@ public class InfoCommand extends ChildCommand {
     }
 
     private Message createInfoMessage(ICommandContext context, Claim claim) {
+//        PluginLogger.info(claim.getName()+" "+context.getPlayer().getName());
         List<ClaimManager.ClaimMemberInfo> members = ClaimManager.fetchClaimMembers(claim.getUuid());
-        Claim parent = claim.getParentUuid() == null ? null : ClaimManager.fetchClaim(claim.getParentUuid());
-
         String currentGroup = context.player() == null
                 ? ClaimCommandFormat.raw("command.format.console")
                 : claim.getPlayerGroup(context.player()).first();
-        String parentText = parent == null
-                ? ClaimCommandFormat.raw("command.format.none")
-                : ClaimCommandFormat.rawMessage("command.format.parent-link")
-                .add("uuid", parent.getUuid())
-                .add("claim", ClaimCommandFormat.escape(parent.getName()))
-                .toString();
 
         return Lang.getMessageList("command.info-message")
+                .copy()
                 .add("claim", ClaimCommandFormat.escape(claim.getName()))
                 .add("owner", ClaimCommandFormat.escape(claim.getOwner().getName()))
-                .add("parent", parentText)
-                .add("depth", claim.getDepth())
+                .add("parent", ClaimCommandFormat.parentPath(claim))
                 .add("subclaim-count", claim.getSubClaims().size())
                 .add("subclaims", ClaimCommandFormat.subClaimHover(claim))
                 .add("group", ClaimCommandFormat.escape(currentGroup))

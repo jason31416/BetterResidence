@@ -53,6 +53,7 @@ public class ListCommand extends ChildCommand {
         int to = Math.min(from + pageSize, claims.size());
 
         MessageList message = Lang.getMessageList("command.list-message")
+                .copy()
                 .add("player", ClaimCommandFormat.escape(owner.getName()))
                 .add("count", claims.size())
                 .add("page", page)
@@ -62,6 +63,7 @@ public class ListCommand extends ChildCommand {
             message.add(createListEntry(claim));
         }
         Lang.getMessageList("command.list-footer")
+                .copy()
                 .add("player", ClaimCommandFormat.escape(owner.getName()))
                 .add("count", claims.size())
                 .add("page", page)

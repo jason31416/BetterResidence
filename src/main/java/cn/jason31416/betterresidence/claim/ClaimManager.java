@@ -37,15 +37,23 @@ public class ClaimManager {
     @Nullable
     @SneakyThrows
     public static Claim fetchClaim(String uuid) {
-        return claimCache.get(uuid, () -> {
-            Optional<MapTree> row = DataHandler.getDatabase().select("claim")
-                    .keyEquals("uuid", uuid)
-                    .one();
-            if (row.isEmpty()) return null;
-            MapTree data = row.get();
-            SimplePlayer owner = SimplePlayer.of(UUID.fromString(data.getString("owner_uuid")));
-            return new Claim(owner, data.getString("name"), uuid, data.getString("parent_uuid", null));
-        });
+        Claim cachedClaim = claimCache.getIfPresent(uuid);
+        if (cachedClaim != null) {
+            return cachedClaim;
+        }
+
+        Optional<MapTree> row = DataHandler.getDatabase().select("claim")
+                .keyEquals("uuid", uuid)
+                .one();
+        if (row.isEmpty()) {
+            return null;
+        }
+
+        MapTree data = row.get();
+        SimplePlayer owner = SimplePlayer.of(UUID.fromString(data.getString("owner_uuid")));
+        Claim claim = new Claim(owner, data.getString("name"), uuid, data.getString("parent_uuid", null));
+        claimCache.put(uuid, claim);
+        return claim;
     }
 
     @Nullable
@@ -64,6 +72,22 @@ public class ClaimManager {
                 .map(row -> fetchClaim(row.getString("uuid")))
                 .filter(claim -> claim != null)
                 .sorted(java.util.Comparator.comparing(Claim::getName, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+    }
+
+    public static List<Claim> fetchTopLevelClaimsByOwner(UUID ownerUuid) {
+        return DataHandler.getDatabase().getSqlInstance().executeQuery(
+                """
+                SELECT uuid
+                FROM claim
+                WHERE owner_uuid = ?
+                  AND parent_uuid IS NULL
+                ORDER BY name COLLATE NOCASE ASC
+                """,
+                List.of(Param.of(ownerUuid.toString())),
+                rs -> fetchClaim(rs.getString("uuid"))
+        ).stream()
+                .filter(claim -> claim != null)
                 .toList();
     }
 
@@ -222,6 +246,26 @@ public class ClaimManager {
         return descendants;
     }
 
+    public static List<String> fetchAncestorClaimUuids(String claimUuid) {
+        List<String> ancestors = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        Claim current = fetchClaim(claimUuid);
+
+        while (current != null && current.getParentUuid() != null && seen.add(current.getUuid())) {
+            ancestors.add(current.getParentUuid());
+            current = fetchClaim(current.getParentUuid());
+        }
+
+        return ancestors;
+    }
+
+    public static Set<String> fetchAncestorOrSelfClaimUuids(String claimUuid) {
+        Set<String> ancestors = new HashSet<>();
+        ancestors.add(claimUuid);
+        ancestors.addAll(fetchAncestorClaimUuids(claimUuid));
+        return ancestors;
+    }
+
     public static boolean hasDescendantAreaOverlap(String claimUuid, String worldUuid, AreaBox areaBox) {
         Set<String> descendantUuids = new HashSet<>(fetchDescendantClaimUuids(claimUuid));
         if (descendantUuids.isEmpty()) {
@@ -229,6 +273,41 @@ public class ClaimManager {
         }
         return fetchOverlappingClaimAreas(worldUuid, areaBox).stream()
                 .anyMatch(area -> descendantUuids.contains(area.claimUuid()));
+    }
+
+    public static boolean isAreaCoveredByClaim(String claimUuid, String worldUuid, AreaBox areaBox) {
+        List<AreaBox> remaining = new ArrayList<>(List.of(areaBox));
+        List<ClaimAreaInfo> coveringAreas = fetchClaimAreas(claimUuid).stream()
+                .filter(area -> area.worldUuid().equals(worldUuid))
+                .filter(area -> area.box().overlaps(areaBox))
+                .toList();
+
+        for (ClaimAreaInfo coveringArea : coveringAreas) {
+            List<AreaBox> nextRemaining = new ArrayList<>();
+            for (AreaBox remainingBox : remaining) {
+                // Each parent area removes the volume it covers from the still-uncovered pieces.
+                // Because AreaBox.subtract returns non-overlapping leftovers, repeatedly applying
+                // it computes coverage by the union of all parent areas without needing a voxel loop.
+                nextRemaining.addAll(remainingBox.subtract(coveringArea.box()));
+            }
+            remaining = nextRemaining;
+            if (remaining.isEmpty()) {
+                return true;
+            }
+        }
+
+        return remaining.isEmpty();
+    }
+
+    public static void copyClaimFlags(String fromClaimUuid, String toClaimUuid) {
+        DataHandler.getDatabase().select("claim_flags")
+                .keyEquals("claim_uuid", fromClaimUuid)
+                .list()
+                .forEach(row -> DataHandler.getDatabase().insert("claim_flags")
+                        .value("flag", row.getString("flag"))
+                        .value("value", row.getString("value"))
+                        .value("claim_uuid", toClaimUuid)
+                        .executeUpdate());
     }
 
     public static List<ClaimMemberInfo> fetchClaimMembers(String claimUuid) {
