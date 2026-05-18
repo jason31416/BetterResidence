@@ -106,6 +106,18 @@ public class Claim {
         }
     }
 
+    @SneakyThrows
+    public void removeArea(int areaId) {
+        DataHandler.getDatabase().executeBatch(List.of(
+                DataHandler.getDatabase().delete("claim_areas")
+                        .keyEquals("area_id", areaId)
+                        .keyEquals("claim_uuid", uuid),
+                DataHandler.getDatabase().delete("area")
+                        .keyEquals("id", areaId)
+        ));
+        ClaimAreaLookup.clearCache();
+    }
+
     // --------- Subclaim ---------------
 
     private void fetchSubclaims(){

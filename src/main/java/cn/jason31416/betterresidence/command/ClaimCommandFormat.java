@@ -39,7 +39,18 @@ final class ClaimCommandFormat {
         ClaimManager.ClaimAreaInfo firstArea = areas.getFirst();
         return rawMessage("command.format.area-summary")
                 .add("count", areas.size())
-                .add("area", formatAreaBox(firstArea.box()))
+                .add("area", areaBox(firstArea.box()))
+                .toString();
+    }
+
+    static String areaBox(cn.jason31416.betterresidence.claim.AreaBox box) {
+        return rawMessage("command.format.area-box")
+                .add("min-x", box.minX())
+                .add("min-y", box.minY())
+                .add("min-z", box.minZ())
+                .add("max-x", box.maxX())
+                .add("max-y", box.maxY())
+                .add("max-z", box.maxZ())
                 .toString();
     }
 
@@ -99,17 +110,6 @@ final class ClaimCommandFormat {
 
     static Message rawMessage(String key) {
         return Message.of(raw(key));
-    }
-
-    private static String formatAreaBox(cn.jason31416.betterresidence.claim.AreaBox box) {
-        return rawMessage("command.format.area-box")
-                .add("min-x", box.minX())
-                .add("min-y", box.minY())
-                .add("min-z", box.minZ())
-                .add("max-x", box.maxX())
-                .add("max-y", box.maxY())
-                .add("max-z", box.maxZ())
-                .toString();
     }
 
     private static String joinLimited(List<String> lines, int limit) {

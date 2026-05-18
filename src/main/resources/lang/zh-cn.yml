@@ -47,6 +47,34 @@ command:
     - "%confirm%"
   remove-confirm-button: "<hover:show_text:'确认删除该领地，此操作不可撤销'><click:run_command:%command%><error-highlight>[确认删除]</click></hover>"
 
+  area-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res area <add|remove|list>"
+  area-add-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res area add [领地]"
+  area-add-no-selection: "<error-primary>错误: <error-content>请先用选区工具选择两个角落"
+  area-add-different-worlds: "<error-primary>错误: <error-content>两个选区点必须在同一个世界"
+  area-add-overlap: "<error-primary>错误: <error-content>选区与领地 <error-highlight>%conflict% <error-content>的区域重叠"
+  area-add-not-enough-money: "<error-primary>错误: <error-content>金币不足，追加该区域需要 <error-highlight>%price%"
+  area-add-unavailable: "<error-primary>错误: <error-content>当前选区不能追加为区域"
+  area-add-success: "<content>已向领地 <highlight>%claim% <content>追加区域，大小 <highlight>%size% <content>方块，花费 <highlight>%price%"
+  area-remove-no-area: "<error-primary>错误: <error-content>当前位置没有可删除的区域"
+  area-remove-last-area: "<error-primary>错误: <error-content>不能删除领地的最后一个区域，请使用 <error-highlight>/res remove <error-content>删除整个领地"
+  area-remove-has-subclaim: "<error-primary>错误: <error-content>该区域包含子领地，不能删除，请先处理子领地"
+  area-remove-no-pending: "<error-primary>错误: <error-content>没有待确认的区域删除操作，请先输入 <error-highlight>/res area remove"
+  area-remove-expired: "<error-primary>错误: <error-content>区域删除确认已过期，请重新输入 <error-highlight>/res area remove"
+  area-remove-success: "<content>已从领地 <highlight>%claim% <content>删除当前位置所在区域 <highlight>%area%"
+  area-remove-confirm-message:
+    - "<dark_gray>======== <error-highlight>删除区域确认 <dark_gray>========"
+    - "<muted>领地: <highlight>%claim%"
+    - "<muted>区域: <highlight>%area%"
+    - "<error-content>此操作不可撤销。请在 <error-highlight>%seconds% <error-content>秒内确认。"
+    - "%confirm%"
+  area-remove-confirm-button: "<hover:show_text:'确认删除当前位置所在区域'><click:run_command:%command%><error-highlight>[确认删除区域]</click></hover>"
+  area-list-message:
+    - "<dark_gray>======== <highlight>%claim% <muted>- 区域列表 <dark_gray>========"
+    - "<content>共 <highlight>%count% <content>个区域"
+    - "%areas%"
+  area-list-entry: "<muted>- <highlight>%area% <muted>| 大小 <highlight>%size%"
+  area-list-empty: "<muted>无区域"
+
   info-message:
     - "<dark_gray>======== <highlight>%claim% <muted>- 领地信息 <dark_gray>========"
     - "<muted>所有者: <highlight>%owner%"
@@ -64,6 +92,7 @@ command:
   format:
     no-areas: "无区域"
     area-summary: "%count% 个区域，首个 %area%"
+    area-box: "(%min-x%, %min-y%, %min-z%) ~ (%max-x%, %max-y%, %max-z%)"
     group-entry: "%group% (%weight%)"
     no-members: "暂无成员"
     member-entry: "%player% -> %group%"

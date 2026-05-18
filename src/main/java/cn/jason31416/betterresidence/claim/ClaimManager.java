@@ -12,9 +12,14 @@ import lombok.SneakyThrows;
 
 import javax.annotation.Nullable;
 import java.sql.ResultSet;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -67,6 +72,15 @@ public class ClaimManager {
                 .keyEquals("name", name)
                 .one()
                 .isPresent();
+    }
+
+    @Nullable
+    public static Claim resolveClaim(String input) {
+        Claim claim = fetchClaimByName(input);
+        if (claim != null) {
+            return claim;
+        }
+        return fetchClaim(input); // by uuid
     }
 
     public static void invalidateClaim(String uuid) {
@@ -174,6 +188,47 @@ public class ClaimManager {
                 List.of(Param.of(claimUuid)),
                 ClaimManager::mapClaimAreaInfo
         );
+    }
+
+    public static Optional<ClaimAreaInfo> findClaimAreaAt(String claimUuid, String worldUuid, int x, int y, int z) {
+        return fetchClaimAreas(claimUuid).stream()
+                .filter(area -> area.worldUuid().equals(worldUuid))
+                .filter(area -> area.box().containsBlock(x, y, z))
+                .findFirst();
+    }
+
+    public static List<String> fetchDescendantClaimUuids(String claimUuid) {
+        List<String> descendants = new ArrayList<>();
+        Queue<String> pending = new ArrayDeque<>();
+        Set<String> seen = new HashSet<>();
+        pending.add(claimUuid);
+        seen.add(claimUuid);
+
+        while (!pending.isEmpty()) {
+            String parentUuid = pending.remove();
+            List<MapTree> rows = DataHandler.getDatabase().select("claim")
+                    .keyEquals("parent_uuid", parentUuid)
+                    .list();
+            for (MapTree row : rows) {
+                String childUuid = row.getString("uuid");
+                if (!seen.add(childUuid)) {
+                    continue;
+                }
+                descendants.add(childUuid);
+                pending.add(childUuid);
+            }
+        }
+
+        return descendants;
+    }
+
+    public static boolean hasDescendantAreaOverlap(String claimUuid, String worldUuid, AreaBox areaBox) {
+        Set<String> descendantUuids = new HashSet<>(fetchDescendantClaimUuids(claimUuid));
+        if (descendantUuids.isEmpty()) {
+            return false;
+        }
+        return fetchOverlappingClaimAreas(worldUuid, areaBox).stream()
+                .anyMatch(area -> descendantUuids.contains(area.claimUuid()));
     }
 
     public static List<ClaimMemberInfo> fetchClaimMembers(String claimUuid) {
