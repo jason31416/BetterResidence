@@ -1,4 +1,4 @@
-package cn.jason31416.betterresidence.claim;
+package cn.jason31416.betterresidence.core;
 
 /**
  * A real assignable claim permission group.

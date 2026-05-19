@@ -1,8 +1,7 @@
-package cn.jason31416.betterresidence.claim;
+package cn.jason31416.betterresidence.core;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.planetlib.data.Param;
-import cn.jason31416.planetlib.util.PluginLogger;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

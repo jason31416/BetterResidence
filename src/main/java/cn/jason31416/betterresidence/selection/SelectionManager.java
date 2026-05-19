@@ -1,6 +1,6 @@
 package cn.jason31416.betterresidence.selection;
 
-import cn.jason31416.betterresidence.claim.AreaBox;
+import cn.jason31416.betterresidence.core.AreaBox;
 import cn.jason31416.betterresidence.visual.AreaBoxVisualizer;
 import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;

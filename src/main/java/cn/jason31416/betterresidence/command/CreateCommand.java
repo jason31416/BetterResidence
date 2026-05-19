@@ -1,7 +1,7 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.claim.ClaimManager;
-import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
+import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.selection.ClaimCreationValidator;
 import cn.jason31416.betterresidence.selection.SelectionManager;
 import cn.jason31416.planetlib.command.ChildCommand;

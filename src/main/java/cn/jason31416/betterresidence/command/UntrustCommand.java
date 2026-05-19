@@ -1,6 +1,6 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.command.ParameterType;

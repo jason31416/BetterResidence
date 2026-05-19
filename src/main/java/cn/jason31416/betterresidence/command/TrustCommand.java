@@ -1,8 +1,8 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.ClaimGroup;
-import cn.jason31416.betterresidence.claim.DefaultClaimGroupRegistry;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimGroup;
+import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.command.ParameterType;
@@ -10,7 +10,6 @@ import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import cn.jason31416.planetlib.util.Lang;
 
-import java.util.Comparator;
 import java.util.List;
 
 public class TrustCommand extends ClaimAdminCommand {

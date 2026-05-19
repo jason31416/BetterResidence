@@ -1,9 +1,8 @@
 package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.BetterResidence;
-import cn.jason31416.betterresidence.claim.AreaBox;
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.selection.ClaimCreationValidator;
 import cn.jason31416.betterresidence.selection.SelectionManager;
 import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
@@ -14,12 +13,9 @@ import cn.jason31416.planetlib.message.StringMessage;
 import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
-import cn.jason31416.planetlib.wrapper.SimplePlayer;
-import cn.jason31416.planetlib.wrapper.SimpleWorld;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,7 +30,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class GeneralEventListener implements Listener {

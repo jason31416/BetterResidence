@@ -1,7 +1,7 @@
 package cn.jason31416.betterresidence.handler.checkers;
 
-import cn.jason31416.betterresidence.claim.AreaBox;
-import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.core.AreaBox;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.betterresidence.handler.DataIntegrityHandler;
 

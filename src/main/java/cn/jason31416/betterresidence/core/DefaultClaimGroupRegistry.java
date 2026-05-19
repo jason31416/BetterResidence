@@ -1,4 +1,4 @@
-package cn.jason31416.betterresidence.claim;
+package cn.jason31416.betterresidence.core;
 
 import cn.jason31416.betterresidence.misc.IllegalConfigurationException;
 import cn.jason31416.planetlib.util.Config;

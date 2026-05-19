@@ -1,7 +1,7 @@
 package cn.jason31416.betterresidence.handler;
 
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;

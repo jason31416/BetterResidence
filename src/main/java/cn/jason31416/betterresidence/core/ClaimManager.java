@@ -1,4 +1,4 @@
-package cn.jason31416.betterresidence.claim;
+package cn.jason31416.betterresidence.core;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.planetlib.data.Param;

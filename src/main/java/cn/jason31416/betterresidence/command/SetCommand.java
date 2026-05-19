@@ -1,15 +1,14 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.DefaultClaimGroupRegistry;
-import cn.jason31416.betterresidence.claim.PermissionRegistry;
-import cn.jason31416.betterresidence.claim.PermissionTargetType;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
+import cn.jason31416.betterresidence.core.PermissionRegistry;
+import cn.jason31416.betterresidence.core.PermissionTargetType;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.command.ParameterType;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
-import cn.jason31416.planetlib.util.PluginLogger;
 
 import java.util.List;
 import java.util.Optional;

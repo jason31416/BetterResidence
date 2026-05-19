@@ -1,8 +1,8 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.ClaimGroup;
-import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimGroup;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
 
@@ -45,7 +45,7 @@ final class ClaimCommandFormat {
                 .toString();
     }
 
-    static String areaBox(cn.jason31416.betterresidence.claim.AreaBox box) {
+    static String areaBox(cn.jason31416.betterresidence.core.AreaBox box) {
         return rawMessage("command.format.area-box")
                 .add("min-x", box.minX())
                 .add("min-y", box.minY())

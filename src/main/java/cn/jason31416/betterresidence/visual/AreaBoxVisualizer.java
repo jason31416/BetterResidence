@@ -1,6 +1,6 @@
 package cn.jason31416.betterresidence.visual;
 
-import cn.jason31416.betterresidence.claim.AreaBox;
+import cn.jason31416.betterresidence.core.AreaBox;
 import cn.jason31416.planetlib.PlanetLib;
 import cn.jason31416.planetlib.lib.folialib.wrapper.task.WrappedTask;
 import cn.jason31416.planetlib.util.Config;

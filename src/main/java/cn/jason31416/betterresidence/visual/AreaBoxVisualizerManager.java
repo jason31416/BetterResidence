@@ -1,6 +1,6 @@
 package cn.jason31416.betterresidence.visual;
 
-import cn.jason31416.betterresidence.claim.AreaBox;
+import cn.jason31416.betterresidence.core.AreaBox;
 import org.bukkit.Color;
 import org.bukkit.World;
 import org.bukkit.entity.Player;

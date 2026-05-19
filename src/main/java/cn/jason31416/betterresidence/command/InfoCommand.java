@@ -1,13 +1,12 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
-import cn.jason31416.planetlib.util.PluginLogger;
 
 import java.util.List;
 

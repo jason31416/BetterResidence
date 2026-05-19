@@ -1,8 +1,8 @@
 package cn.jason31416.betterresidence.selection;
 
-import cn.jason31416.betterresidence.claim.AreaBox;
-import cn.jason31416.betterresidence.claim.Claim;
-import cn.jason31416.betterresidence.claim.ClaimManager;
+import cn.jason31416.betterresidence.core.AreaBox;
+import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import org.bukkit.World;

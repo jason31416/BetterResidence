@@ -1,10 +1,10 @@
 package cn.jason31416.betterresidence;
 
-import cn.jason31416.betterresidence.claim.ClaimManager;
-import cn.jason31416.betterresidence.claim.DefaultClaimGroupRegistry;
-import cn.jason31416.betterresidence.claim.TargetGroup;
-import cn.jason31416.betterresidence.claim.AreaBox;
-import cn.jason31416.betterresidence.claim.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
+import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
+import cn.jason31416.betterresidence.core.TargetGroup;
+import cn.jason31416.betterresidence.core.AreaBox;
+import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.planetlib.Required;
 import cn.jason31416.planetlib.message.MessageTheme;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
