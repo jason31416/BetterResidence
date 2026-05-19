@@ -9,6 +9,7 @@ public class BetterResidenceCommand extends RootCommand {
     public BetterResidenceCommand() {
         super("betterresidence");
 
+        new AdminCommand(this);
         new ReloadCommand(this);
         new TrustCommand(this);
         new UntrustCommand(this);

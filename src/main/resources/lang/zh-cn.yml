@@ -25,6 +25,15 @@ command:
   reload-success: "<highlight>BetterResidence <content>已重新加载"
   reload-failed: "<error-primary>错误: <error-content>BetterResidence 重新加载失败: <error-highlight>%error%"
 
+  admin-help: "<content>BetterResidence 管理命令: <highlight>/res admin fsck"
+  fsck-started: "<content>已开始检查 BetterResidence 数据完整性..."
+  fsck-check-completed: "<content>检查项 <highlight>%check% <content>已完成: %status% <muted>(异常数据行: <highlight>%rows%<muted>)"
+  fsck-check-status-passed: "<green>通过"
+  fsck-check-status-failed: "<red>失败"
+  fsck-success: "<content>数据完整性检查完成，未发现失败的检查项"
+  fsck-failed: "<error-primary>警告: <error-content>数据完整性检查完成，<error-highlight>%failed% <error-content>个检查项失败。报告: <error-highlight>%report%"
+  fsck-report-unavailable: "报告写入失败"
+
   create-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res create <领地名>"
   create-no-selection: "<error-primary>错误: <error-content>请先用选区工具选择两个角落"
   create-different-worlds: "<error-primary>错误: <error-content>两个选区点必须在同一个世界"
