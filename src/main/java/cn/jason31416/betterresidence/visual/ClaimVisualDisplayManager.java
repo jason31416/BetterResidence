@@ -68,6 +68,10 @@ public final class ClaimVisualDisplayManager {
     }
 
     public static void flashClaim(Player player, ClaimManager.ClaimAreaInfo area) {
+        flashClaim(player, area, Math.max(250, Config.getInt("visualizer.claim-flash.duration-millis", 1500)));
+    }
+
+    public static void flashClaim(Player player, ClaimManager.ClaimAreaInfo area, long durationMillis) {
         if (!Config.getBoolean("visualizer.claim-flash.enabled", true)) {
             return;
         }
@@ -80,7 +84,7 @@ public final class ClaimVisualDisplayManager {
         PlayerDisplayState state = getState(player);
         Color frameColor = getColor("visualizer.claim-flash.frame-color");
         Color sideColor = getColor("visualizer.claim-flash.side-color");
-        long expiresAt = System.currentTimeMillis() + Math.max(250, Config.getInt("visualizer.claim-flash.duration-millis", 1500));
+        long expiresAt = System.currentTimeMillis() + Math.max(250L, durationMillis);
         AreaBoxVisualizer.RenderedAreaBox box = AreaBoxVisualizerManager.addBox(player, world, area.box(), frameColor, sideColor);
         state.flashBoxes.add(new TimedBox(box, expiresAt));
     }

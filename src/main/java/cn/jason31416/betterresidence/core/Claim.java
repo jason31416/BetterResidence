@@ -118,6 +118,20 @@ public class Claim {
         ClaimAreaLookup.clearCache();
     }
 
+    @SneakyThrows
+    public void updateArea(int areaId, AreaBox areaBox) {
+        DataHandler.getDatabase().update("area")
+                .value("minX", areaBox.minX())
+                .value("maxX", areaBox.maxX())
+                .value("minY", areaBox.minY())
+                .value("maxY", areaBox.maxY())
+                .value("minZ", areaBox.minZ())
+                .value("maxZ", areaBox.maxZ())
+                .keyEquals("id", areaId)
+                .executeUpdate();
+        ClaimAreaLookup.clearCache();
+    }
+
     // --------- Subclaim ---------------
 
     private void fetchSubclaims(){

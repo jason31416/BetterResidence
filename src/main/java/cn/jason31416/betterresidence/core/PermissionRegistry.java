@@ -138,6 +138,7 @@ public final class PermissionRegistry {
         registerPermission("admin.area.add", PermissionTargetType.NONE);
         registerPermission("admin.area.remove", PermissionTargetType.NONE);
         registerPermission("admin.area.list", PermissionTargetType.NONE);
+        registerPermission("admin.area.resize", PermissionTargetType.NONE);
 
         registerPermission("block.break", PermissionTargetType.BLOCK);
         registerPermission("block.place", PermissionTargetType.BLOCK);

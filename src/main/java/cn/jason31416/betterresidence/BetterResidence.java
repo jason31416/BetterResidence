@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import cn.jason31416.planetlib.PlanetLib;
 import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.betterresidence.command.BetterResidenceCommand;
+import cn.jason31416.betterresidence.handler.CommandSuggestionListener;
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.betterresidence.handler.GeneralEventListener;
 import cn.jason31416.betterresidence.handler.ProtectionEventListener;
@@ -38,6 +39,7 @@ public final class BetterResidence extends JavaPlugin {
 
             DataHandler.init();
             new BetterResidenceCommand().register();
+            getServer().getPluginManager().registerEvents(new CommandSuggestionListener(), this);
             getServer().getPluginManager().registerEvents(new GeneralEventListener(), this);
             getServer().getPluginManager().registerEvents(new ProtectionEventListener(), this);
 

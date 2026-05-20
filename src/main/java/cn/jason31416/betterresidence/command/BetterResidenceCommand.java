@@ -21,6 +21,8 @@ public class BetterResidenceCommand extends RootCommand {
         new CreateCommand(this);
         new RemoveCommand(this);
         new AreaCommand(this);
+        new ResizeCommand(this, "expand", true);
+        new ResizeCommand(this, "contract", false);
     }
 
     @Override

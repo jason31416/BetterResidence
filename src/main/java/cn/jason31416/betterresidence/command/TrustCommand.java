@@ -12,6 +12,7 @@ import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import cn.jason31416.planetlib.util.Lang;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class TrustCommand extends ChildCommand {
@@ -93,12 +94,9 @@ public class TrustCommand extends ChildCommand {
         }
     }
 
-    /**
-     * Supposed to sort group completions from highest permission weight to lowest, but tab completion probably don't support ordered.
-     */
     protected static List<String> completeGroups(List<GroupCompletion> groups) {
         return groups.stream()
-//                .sorted(Comparator.comparingInt(GroupCompletion::weight).reversed())
+                .sorted(Comparator.comparingInt(GroupCompletion::weight).reversed())
                 .map(GroupCompletion::name)
                 .toList();
     }

@@ -106,6 +106,19 @@ command:
   area-list-entry: "<muted>- <highlight>%area% <muted>| 大小 <highlight>%size%"
   area-list-empty: "<muted>无区域"
 
+  expand-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res expand <方块数>"
+  contract-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res contract <方块数>"
+  resize-invalid-blocks: "<error-primary>错误: <error-content>方块数必须是正整数"
+  resize-no-area: "<error-primary>错误: <error-content>当前位置没有可调整的区域"
+  resize-too-small: "<error-primary>错误: <error-content>区域太小，不能按该方向收缩这么多方块"
+  resize-outside-parent: "<error-primary>错误: <error-content>子领地区域必须完全位于父领地范围内"
+  resize-overlap: "<error-primary>错误: <error-content>调整后的区域与领地 <error-highlight>%conflict% <error-content>重叠"
+  resize-descendant-outside: "<error-primary>错误: <error-content>调整后会导致子领地区域超出父领地范围"
+  resize-not-enough-money: "<error-primary>错误: <error-content>金币不足，扩展该区域需要 <error-highlight>%price%"
+  resize-unavailable: "<error-primary>错误: <error-content>当前区域不能这样调整"
+  expand-success: "<content>已向 <highlight>%direction% <content>方向扩展领地 <highlight>%claim% <highlight>%blocks% <content>格，新增 <highlight>%changed-blocks% <content>方块，花费 <highlight>%price%"
+  contract-success: "<content>已向 <highlight>%direction% <content>方向收缩领地 <highlight>%claim% <highlight>%blocks% <content>格，减少 <highlight>%changed-blocks% <content>方块"
+
   info-message:
     - "<dark_gray>======== <highlight>%claim% <muted>- 领地信息 <dark_gray>========"
     - "<muted>所有者: <highlight>%owner%"
