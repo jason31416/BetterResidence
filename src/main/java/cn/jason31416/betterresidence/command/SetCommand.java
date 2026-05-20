@@ -1,9 +1,11 @@
 package cn.jason31416.betterresidence.command;
 
 import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.core.PermissionRegistry;
 import cn.jason31416.betterresidence.core.PermissionTargetType;
+import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.command.ParameterType;
@@ -14,22 +16,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class SetCommand extends ClaimAdminCommand {
+public class SetCommand extends ChildCommand {
     public SetCommand(IParentCommand parent) {
         super("set", parent);
     }
 
     @Override
     public Message execute(ICommandContext context) {
-        Message validationError = validateClaimAdmin(context);
-        if (validationError != null) {
-            return validationError;
+        if (context.player() == null) {
+            return Lang.getMessage("command.player-only");
+        }
+        Claim claim = getClaim(context);
+        if (claim == null) {
+            return Lang.getMessage("command.not-in-claim");
+        }
+        if (!claim.checkPlayerPermission(context.player(), "admin.setpermission", null)) {
+            return Lang.getMessage("command.no-claim-admin");
         }
         if (!context.checkArgs(ParameterType.STRING, ParameterType.STRING)) {
             return null;
         }
 
-        Claim claim = getClaim(context);
         String permission = normalizePermission(context.getArg(0));
         Optional<PermissionTargetType> targetType = getTargetType(permission);
         if (targetType.isEmpty()) {
@@ -74,6 +81,10 @@ public class SetCommand extends ClaimAdminCommand {
             return TrustCommand.completeGroups(groups);
         }
         return List.of();
+    }
+
+    private Claim getClaim(ICommandContext context) {
+        return ClaimManager.findClaimAt(context.player().getLocation());
     }
 
     private String normalizePermission(String permission) {

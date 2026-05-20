@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence;
 
 import cn.jason31416.betterresidence.core.ClaimManager;
+import cn.jason31416.betterresidence.core.ClaimNameValidator;
 import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.core.TargetGroup;
 import cn.jason31416.betterresidence.core.AreaBox;
@@ -78,6 +79,7 @@ public final class BetterResidence extends JavaPlugin {
         Lang.init("lang/" + Config.getString("lang", "en-us") + ".yml");
         MessageTheme.loadThemesFromFile("lang/theme.yml");
         MessageTheme.useTheme(Config.getString("theme", "default"));
+        ClaimNameValidator.validateConfig();
         DefaultClaimGroupRegistry.loadConfig();
         TargetGroup.loadConfig();
     }

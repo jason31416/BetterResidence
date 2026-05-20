@@ -68,7 +68,7 @@ public final class ClaimCreationValidator {
             return ValidationResult.invalid(Reason.SUBCLAIM_OVERLAP, areaBox, world, size, 0D, createConflictText(overlappingAreas), parent);
         }
 
-        if (!parent.checkPlayerPermission(SimplePlayer.of(player), "admin", null)) {
+        if (!parent.checkPlayerPermission(SimplePlayer.of(player), "admin.subclaim", null)) {
             return ValidationResult.invalid(Reason.NO_PARENT_ADMIN, areaBox, world, size, 0D, "", parent);
         }
 

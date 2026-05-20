@@ -2,6 +2,7 @@ package cn.jason31416.betterresidence.command;
 
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
+import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.message.Message;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class RemoveCommand extends ClaimAdminCommand {
+public class RemoveCommand extends ChildCommand {
     private static final long CONFIRM_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(30);
     private static final Map<UUID, PendingRemoval> PENDING_REMOVALS = new HashMap<>();
 
@@ -27,12 +28,17 @@ public class RemoveCommand extends ClaimAdminCommand {
             return confirmRemoval(context);
         }
 
-        Message validationError = validateClaimAdmin(context);
-        if (validationError != null) {
-            return validationError;
+        if (context.player() == null) {
+            return Lang.getMessage("command.player-only");
+        }
+        Claim claim = getClaim(context);
+        if (claim == null) {
+            return Lang.getMessage("command.not-in-claim");
+        }
+        if (!claim.checkPlayerPermission(context.player(), "admin.removeclaim", null)) {
+            return Lang.getMessage("command.no-claim-admin");
         }
 
-        Claim claim = getClaim(context);
         PendingRemoval pendingRemoval = new PendingRemoval(claim.getUuid(), System.currentTimeMillis() + CONFIRM_TIMEOUT_MILLIS);
         PENDING_REMOVALS.put(context.player().getUUID(), pendingRemoval);
 
@@ -67,7 +73,7 @@ public class RemoveCommand extends ClaimAdminCommand {
             return Lang.getMessage("command.claim-not-found").copy()
                     .add("claim", ClaimCommandFormat.shortUuid(pendingRemoval.claimUuid()));
         }
-        if (!claim.checkPlayerPermission(context.player(), "admin", null)) {
+        if (!claim.checkPlayerPermission(context.player(), "admin.removeclaim", null)) {
             return Lang.getMessage("command.no-claim-admin");
         }
 
@@ -108,6 +114,10 @@ public class RemoveCommand extends ClaimAdminCommand {
             return ClaimCommandFormat.raw("command.format.none");
         }
         return ClaimCommandFormat.escape(parent.getName());
+    }
+
+    private Claim getClaim(ICommandContext context) {
+        return ClaimManager.findClaimAt(context.player().getLocation());
     }
 
     private record PendingRemoval(String claimUuid, long expiresAtMillis) {

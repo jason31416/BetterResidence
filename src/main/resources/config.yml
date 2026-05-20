@@ -6,6 +6,9 @@ lang: "zh-cn"
 theme: "default"
 
 claim:
+  # Regex that claim names must fully match. Keep it command-friendly unless you also update command parsing.
+  name-regex: "[A-Za-z0-9_-]{1,64}"
+
   # Maximum top-level claims each player can own. Use -1 for no limit.
   # The plugin can handle millions of claims with reasonable performance, so you don't have to limit this for performance.
   max-claims-per-player: -1
@@ -42,7 +45,7 @@ claim:
       permission: "*:all"
       weight: 900
     owner-only-admin: # By default, only owner should be able to grant/revoke permission and edit claim settings.
-      permission: "admin"
+      permission: "admin.*"
       weight: 1000
 
 # Visualizer settings control particle-based area previews.

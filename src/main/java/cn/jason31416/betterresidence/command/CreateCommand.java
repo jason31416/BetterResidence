@@ -2,6 +2,7 @@ package cn.jason31416.betterresidence.command;
 
 import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.ClaimNameValidator;
 import cn.jason31416.betterresidence.selection.ClaimCreationValidator;
 import cn.jason31416.betterresidence.selection.SelectionManager;
 import cn.jason31416.planetlib.command.ChildCommand;
@@ -31,6 +32,11 @@ public class CreateCommand extends ChildCommand {
         }
 
         String claimName = context.getArg(0);
+        if (!ClaimNameValidator.isValid(claimName)) {
+            return Lang.getMessage("command.create-invalid-name").copy()
+                    .add("claim", claimName)
+                    .add("regex", ClaimNameValidator.getRegex());
+        }
         if (ClaimManager.claimNameExists(claimName)) {
             return Lang.getMessage("command.create-name-exists").copy()
                     .add("claim", claimName);

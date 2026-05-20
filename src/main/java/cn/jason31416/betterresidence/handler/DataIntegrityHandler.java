@@ -1,7 +1,19 @@
 package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.BetterResidence;
+import cn.jason31416.betterresidence.handler.checkers.AreaLinkIntegrityChecker;
+import cn.jason31416.betterresidence.handler.checkers.ClaimAreaBoundsChecker;
+import cn.jason31416.betterresidence.handler.checkers.ClaimHasAreaChecker;
+import cn.jason31416.betterresidence.handler.checkers.ClaimNameFormatChecker;
+import cn.jason31416.betterresidence.handler.checkers.ClaimTreeCycleChecker;
+import cn.jason31416.betterresidence.handler.checkers.ClaimUuidFormatChecker;
+import cn.jason31416.betterresidence.handler.checkers.CustomGroupIntegrityChecker;
+import cn.jason31416.betterresidence.handler.checkers.DatabaseSchemaChecker;
+import cn.jason31416.betterresidence.handler.checkers.DisallowedAreaOverlapChecker;
 import cn.jason31416.betterresidence.handler.checkers.DuplicateClaimNamesChecker;
+import cn.jason31416.betterresidence.handler.checkers.MissingClaimReferencesChecker;
+import cn.jason31416.betterresidence.handler.checkers.PermissionRuleIntegrityChecker;
+import cn.jason31416.betterresidence.handler.checkers.PlayerGroupReferenceChecker;
 import cn.jason31416.betterresidence.handler.checkers.SubclaimParentBoundsChecker;
 import cn.jason31416.planetlib.util.PluginLogger;
 
@@ -31,8 +43,20 @@ public final class DataIntegrityHandler {
     private static volatile Path lastReportFile;
 
     static {
+        registerChecker(new DatabaseSchemaChecker());
         registerChecker(new DuplicateClaimNamesChecker());
+        registerChecker(new ClaimNameFormatChecker());
+        registerChecker(new ClaimUuidFormatChecker());
+        registerChecker(new MissingClaimReferencesChecker());
+        registerChecker(new AreaLinkIntegrityChecker());
+        registerChecker(new ClaimAreaBoundsChecker());
+        registerChecker(new ClaimHasAreaChecker());
+        registerChecker(new ClaimTreeCycleChecker());
         registerChecker(new SubclaimParentBoundsChecker());
+        registerChecker(new DisallowedAreaOverlapChecker());
+        registerChecker(new CustomGroupIntegrityChecker());
+        registerChecker(new PlayerGroupReferenceChecker());
+        registerChecker(new PermissionRuleIntegrityChecker());
     }
 
     private DataIntegrityHandler() {

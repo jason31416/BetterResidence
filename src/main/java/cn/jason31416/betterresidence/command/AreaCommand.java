@@ -72,7 +72,7 @@ public class AreaCommand extends ChildCommand {
                     ? Lang.getMessage("command.claim-not-found").copy().add("claim", ClaimCommandFormat.escape(claimInput))
                     : Lang.getMessage("command.not-in-claim");
         }
-        if (!claim.checkPlayerPermission(context.player(), "admin", null)) {
+        if (!claim.checkPlayerPermission(context.player(), "admin.area.add", null)) {
             return Lang.getMessage("command.no-claim-admin");
         }
 
@@ -155,7 +155,7 @@ public class AreaCommand extends ChildCommand {
             return Lang.getMessage("command.claim-not-found").copy()
                     .add("claim", ClaimCommandFormat.shortUuid(pendingRemoval.claimUuid()));
         }
-        if (!claim.checkPlayerPermission(context.player(), "admin", null)) {
+        if (!claim.checkPlayerPermission(context.player(), "admin.area.remove", null)) {
             return Lang.getMessage("command.no-claim-admin");
         }
 
@@ -188,7 +188,7 @@ public class AreaCommand extends ChildCommand {
         if (claim == null) {
             return Lang.getMessage("command.not-in-claim");
         }
-        if (!claim.checkPlayerPermission(context.player(), "admin", null)) {
+        if (!claim.checkPlayerPermission(context.player(), "admin.area.list", null)) {
             return Lang.getMessage("command.no-claim-admin");
         }
 
@@ -214,7 +214,7 @@ public class AreaCommand extends ChildCommand {
         if (claim == null) {
             return AreaAtPlayer.error(Lang.getMessage("command.not-in-claim"));
         }
-        if (!claim.checkPlayerPermission(context.player(), "admin", null)) {
+        if (!claim.checkPlayerPermission(context.player(), "admin.area.remove", null)) {
             return AreaAtPlayer.error(Lang.getMessage("command.no-claim-admin"));
         }
 

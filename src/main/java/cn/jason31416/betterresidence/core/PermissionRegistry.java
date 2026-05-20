@@ -98,11 +98,17 @@ public final class PermissionRegistry {
 
     static {
         registerPermission("block.break", PermissionTargetType.BLOCK);
-        registerPermission("block.place", PermissionTargetType.BLOCK);
-        registerPermission("block.interact", PermissionTargetType.BLOCK);
-        registerPermission("entity.damage", PermissionTargetType.ENTITY); // Allow player to hit entity
-        registerPermission("entity.interact", PermissionTargetType.ENTITY);
-        registerPermission("admin", PermissionTargetType.NONE);
+        registerPermission("admin.trust", PermissionTargetType.NONE);
+        registerPermission("admin.setpermission", PermissionTargetType.NONE);
+        registerPermission("admin.removeclaim", PermissionTargetType.NONE);
+        registerPermission("admin.subclaim", PermissionTargetType.NONE);
+        registerPermission("admin.area.add", PermissionTargetType.NONE);
+        registerPermission("admin.area.remove", PermissionTargetType.NONE);
+        registerPermission("admin.area.list", PermissionTargetType.NONE);
+//        registerPermission("block.place", PermissionTargetType.BLOCK);
+//        registerPermission("block.interact", PermissionTargetType.BLOCK);
+//        registerPermission("entity.damage", PermissionTargetType.ENTITY); // Allow player to hit entity
+//        registerPermission("entity.interact", PermissionTargetType.ENTITY);
     }
 
     /**

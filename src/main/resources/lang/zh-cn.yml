@@ -45,6 +45,7 @@ command:
   create-max-subclaim-depth: "<error-primary>错误: <error-content>子领地深度已达到上限 <error-highlight>%max-depth%"
   create-not-enough-money: "<error-primary>错误: <error-content>金币不足，创建该领地需要 <error-highlight>%price%"
   create-subclaim-overlap: "<error-primary>错误: <error-content>子领地只能与父级领地链重叠，当前选区冲突领地: <error-highlight>%conflict%"
+  create-invalid-name: "<error-primary>错误: <error-content>领地名 <error-highlight>%claim% <error-content>不合法，必须匹配正则: <error-highlight>%regex%"
   create-name-exists: "<error-primary>错误: <error-content>领地 <error-highlight>%claim% <error-content>已存在"
   create-unavailable: "<error-primary>错误: <error-content>当前选区不能创建领地"
   create-success: "<content>已创建领地 <highlight>%claim%<content>，大小 <highlight>%size% <content>方块，花费 <highlight>%price%"

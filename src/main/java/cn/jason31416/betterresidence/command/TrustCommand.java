@@ -2,7 +2,9 @@ package cn.jason31416.betterresidence.command;
 
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimGroup;
+import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
+import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.command.ParameterType;
@@ -12,22 +14,27 @@ import cn.jason31416.planetlib.util.Lang;
 
 import java.util.List;
 
-public class TrustCommand extends ClaimAdminCommand {
+public class TrustCommand extends ChildCommand {
     public TrustCommand(IParentCommand parent) {
         super("trust", parent);
     }
 
     @Override
     public Message execute(ICommandContext context) {
-        Message validationError = validateClaimAdmin(context);
-        if (validationError != null) {
-            return validationError;
+        if (context.player() == null) {
+            return Lang.getMessage("command.player-only");
+        }
+        Claim claim = getClaim(context);
+        if (claim == null) {
+            return Lang.getMessage("command.not-in-claim");
+        }
+        if (!claim.checkPlayerPermission(context.player(), "admin.trust", null)) {
+            return Lang.getMessage("command.no-claim-admin");
         }
         if (!context.checkArgs(ParameterType.PLAYER)) {
             return null;
         }
 
-        Claim claim = getClaim(context);
         SimplePlayer target = context.getPlayerArg(0);
         String groupName = context.args().size() >= 2
                 ? context.getArg(1)
@@ -67,6 +74,10 @@ public class TrustCommand extends ClaimAdminCommand {
             return completeGroups(groups);
         }
         return List.of();
+    }
+
+    private Claim getClaim(ICommandContext context) {
+        return ClaimManager.findClaimAt(context.player().getLocation());
     }
 
     /**
