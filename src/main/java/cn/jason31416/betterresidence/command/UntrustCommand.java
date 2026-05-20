@@ -34,6 +34,10 @@ public class UntrustCommand extends ChildCommand {
         }
 
         SimplePlayer target = context.getPlayerArg(0);
+        if (target.equals(claim.getOwner())) {
+            return Lang.getMessage("command.cannot-trust-owner");
+        }
+
         claim.setPlayerGroup(target, null);
 
         return Lang.getMessage("command.untrust-success").copy()

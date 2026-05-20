@@ -12,6 +12,7 @@ command:
   not-in-claim: "<error-primary>错误: <error-content>您不在任何领地内"
   no-claim-admin: "<error-primary>错误: <error-content>您没有权限管理该领地"
   group-not-found: "<error-primary>错误: <error-content>找不到名为 <error-highlight>%group% <error-content>的权限组"
+  cannot-trust-owner: "<error-primary>错误: <error-content>不能修改领地主人的权限组"
   permission-not-found: "<error-primary>错误: <error-content>未知权限 <error-highlight>%permission%"
   permission-target-unsupported: "<error-primary>错误: <error-content>权限 <error-highlight>%permission% <error-content>不支持目标后缀"
   claim-not-found: "<error-primary>错误: <error-content>找不到领地 <error-highlight>%claim%"

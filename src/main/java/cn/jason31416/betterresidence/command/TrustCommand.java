@@ -36,6 +36,10 @@ public class TrustCommand extends ChildCommand {
         }
 
         SimplePlayer target = context.getPlayerArg(0);
+        if (target.equals(claim.getOwner())) {
+            return Lang.getMessage("command.cannot-trust-owner");
+        }
+
         String groupName = context.args().size() >= 2
                 ? context.getArg(1)
                 : DefaultClaimGroupRegistry.getTrustedGroup().name();
