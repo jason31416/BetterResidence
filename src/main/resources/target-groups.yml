@@ -9,9 +9,104 @@ block:
     priority: 2
     targets:
       - "chest"
-      - ".*_chest"
-      - "chest_minecart"
-      - ".*_chest_boat"
+      - "trapped_chest"
+      - "ender_chest"
+      - "barrel"
+      - ".*_shulker_box"
+  doors:
+    name: "target-group.block.doors"
+    priority: 2
+    targets:
+      - ".*_door"
+      - ".*_trapdoor"
+      - ".*_fence_gate"
+  signs:
+    name: "target-group.block.signs"
+    priority: 3
+    targets:
+      - ".*_sign"
+      - ".*_wall_sign"
+      - ".*_hanging_sign"
+      - ".*_wall_hanging_sign"
+  redstone:
+    name: "target-group.block.redstone"
+    priority: 2
+    targets:
+      - "redstone_wire"
+      - "redstone_torch"
+      - "redstone_wall_torch"
+      - "repeater"
+      - "comparator"
+      - "observer"
+      - "piston"
+      - "sticky_piston"
+      - "dispenser"
+      - "dropper"
+      - "hopper"
+      - "lever"
+      - ".*_button"
+      - ".*_pressure_plate"
+      - "light_weighted_pressure_plate"
+      - "heavy_weighted_pressure_plate"
+      - "target"
+      - "daylight_detector"
+      - "tripwire"
+      - "tripwire_hook"
+      - "crafter"
+      - "copper_bulb"
+      - ".*_copper_bulb"
+  workstations:
+    name: "target-group.block.workstations"
+    priority: 2
+    targets:
+      - "crafting_table"
+      - "furnace"
+      - "blast_furnace"
+      - "smoker"
+      - "brewing_stand"
+      - "cartography_table"
+      - "fletching_table"
+      - "smithing_table"
+      - "stonecutter"
+      - "grindstone"
+      - "loom"
+      - "lectern"
+      - "enchanting_table"
+      - "anvil"
+      - "chipped_anvil"
+      - "damaged_anvil"
+  crops:
+    name: "target-group.block.crops"
+    priority: 2
+    targets:
+      - "wheat"
+      - "carrots"
+      - "potatoes"
+      - "beetroots"
+      - "nether_wart"
+      - "cocoa"
+      - "melon_stem"
+      - "pumpkin_stem"
+      - "attached_melon_stem"
+      - "attached_pumpkin_stem"
+      - "sweet_berry_bush"
+      - "cave_vines"
+      - "cave_vines_plant"
+      - "pitcher_crop"
+      - "torchflower_crop"
+  beds:
+    name: "target-group.block.beds"
+    priority: 3
+    targets:
+      - ".*_bed"
+  rails:
+    name: "target-group.block.rails"
+    priority: 2
+    targets:
+      - "rail"
+      - "activator_rail"
+      - "detector_rail"
+      - "powered_rail"
 
 material:
   all:
@@ -19,6 +114,72 @@ material:
     priority: 1
     targets:
       - ".*"
+  spawn_eggs:
+    name: "target-group.material.spawn_eggs"
+    priority: 2
+    targets:
+      - ".*_spawn_egg"
+  tools:
+    name: "target-group.material.tools"
+    priority: 2
+    targets:
+      - ".*_pickaxe"
+      - ".*_axe"
+      - ".*_shovel"
+      - ".*_hoe"
+      - "shears"
+      - "brush"
+      - "flint_and_steel"
+      - "fishing_rod"
+  weapons:
+    name: "target-group.material.weapons"
+    priority: 2
+    targets:
+      - ".*_sword"
+      - "bow"
+      - "crossbow"
+      - "trident"
+      - "mace"
+  armor:
+    name: "target-group.material.armor"
+    priority: 2
+    targets:
+      - ".*_helmet"
+      - ".*_chestplate"
+      - ".*_leggings"
+      - ".*_boots"
+      - "elytra"
+      - "turtle_helmet"
+      - ".*_horse_armor"
+      - "wolf_armor"
+  buckets:
+    name: "target-group.material.buckets"
+    priority: 2
+    targets:
+      - "bucket"
+      - ".*_bucket"
+  boats:
+    name: "target-group.material.boats"
+    priority: 2
+    targets:
+      - ".*_boat"
+      - ".*_chest_boat"
+      - "bamboo_raft"
+      - "bamboo_chest_raft"
+  minecarts:
+    name: "target-group.material.minecarts"
+    priority: 2
+    targets:
+      - "minecart"
+      - ".*_minecart"
+  potions:
+    name: "target-group.material.potions"
+    priority: 2
+    targets:
+      - "potion"
+      - "splash_potion"
+      - "lingering_potion"
+      - "tipped_arrow"
 
 entity:
   all:
@@ -26,3 +187,158 @@ entity:
     priority: 1
     targets:
       - ".*"
+  hostile_mobs:
+    name: "target-group.entity.hostile_mobs"
+    priority: 2
+    targets:
+      - "blaze"
+      - "bogged"
+      - "breeze"
+      - "cave_spider"
+      - "creaking"
+      - "creeper"
+      - "drowned"
+      - "elder_guardian"
+      - "endermite"
+      - "evoker"
+      - "ghast"
+      - "giant"
+      - "guardian"
+      - "hoglin"
+      - "husk"
+      - "illusioner"
+      - "magma_cube"
+      - "phantom"
+      - "piglin_brute"
+      - "pillager"
+      - "ravager"
+      - "shulker"
+      - "silverfish"
+      - "skeleton"
+      - "slime"
+      - "spider"
+      - "stray"
+      - "vex"
+      - "vindicator"
+      - "warden"
+      - "witch"
+      - "wither_skeleton"
+      - "zoglin"
+      - "zombie"
+      - "zombie_villager"
+  bosses:
+    name: "target-group.entity.bosses"
+    priority: 3
+    targets:
+      - "ender_dragon"
+      - "wither"
+  neutral_mobs:
+    name: "target-group.entity.neutral_mobs"
+    priority: 2
+    targets:
+      - "bee"
+      - "dolphin"
+      - "enderman"
+      - "goat"
+      - "iron_golem"
+      - "llama"
+      - "panda"
+      - "piglin"
+      - "polar_bear"
+      - "pufferfish"
+      - "snow_golem"
+      - "trader_llama"
+      - "wolf"
+      - "zombified_piglin"
+  passive_mobs:
+    name: "target-group.entity.passive_mobs"
+    priority: 2
+    targets:
+      - "allay"
+      - "armadillo"
+      - "axolotl"
+      - "bat"
+      - "camel"
+      - "cat"
+      - "chicken"
+      - "cod"
+      - "cow"
+      - "donkey"
+      - "fox"
+      - "frog"
+      - "glow_squid"
+      - "happy_ghast"
+      - "horse"
+      - "mooshroom"
+      - "mule"
+      - "ocelot"
+      - "parrot"
+      - "pig"
+      - "rabbit"
+      - "salmon"
+      - "sheep"
+      - "skeleton_horse"
+      - "sniffer"
+      - "squid"
+      - "strider"
+      - "tadpole"
+      - "tropical_fish"
+      - "turtle"
+      - "zombie_horse"
+  villagers:
+    name: "target-group.entity.villagers"
+    priority: 3
+    targets:
+      - "villager"
+      - "wandering_trader"
+  vehicles:
+    name: "target-group.entity.vehicles"
+    priority: 2
+    targets:
+      - ".*_boat"
+      - ".*_chest_boat"
+      - "bamboo_raft"
+      - "bamboo_chest_raft"
+      - "minecart"
+      - ".*_minecart"
+  projectiles:
+    name: "target-group.entity.projectiles"
+    priority: 2
+    targets:
+      - "arrow"
+      - "breeze_wind_charge"
+      - "dragon_fireball"
+      - "egg"
+      - "ender_pearl"
+      - "evoker_fangs"
+      - "experience_bottle"
+      - "eye_of_ender"
+      - "fireball"
+      - "firework_rocket"
+      - "fishing_bobber"
+      - "lingering_potion"
+      - "llama_spit"
+      - "shulker_bullet"
+      - "small_fireball"
+      - "snowball"
+      - "spectral_arrow"
+      - "splash_potion"
+      - "trident"
+      - "wind_charge"
+      - "wither_skull"
+  displays:
+    name: "target-group.entity.displays"
+    priority: 3
+    targets:
+      - "block_display"
+      - "item_display"
+      - "text_display"
+      - "interaction"
+  hanging:
+    name: "target-group.entity.hanging"
+    priority: 3
+    targets:
+      - "glow_item_frame"
+      - "item_frame"
+      - "leash_knot"
+      - "painting"
