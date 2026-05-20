@@ -323,6 +323,7 @@ public class ClaimManager {
                         SimplePlayer.of(UUID.fromString(row.getString("player_uuid"))),
                         row.getString("group_id")
                 ))
+                .filter(member -> member.player().getName()!=null)
                 .sorted(java.util.Comparator.comparing(member -> member.player().getName(), String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }

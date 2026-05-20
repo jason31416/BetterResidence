@@ -14,6 +14,7 @@ public class AdminCommand extends ParentCommand {
     public AdminCommand(IParentCommand parent) {
         super("admin", parent);
         new FsckCommand(this);
+        new MigrateCommand(this);
         new ToggleAdminModeCommand(this);
     }
 

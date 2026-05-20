@@ -10,11 +10,15 @@ version = "1.0.0"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://jitpack.io")
     mavenLocal()
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
+    compileOnly("com.github.Zrips:Residence:6.0.0.1") {
+        isTransitive = false
+    }
     implementation("cn.jason31416:PlanetLib:1.4.1")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
