@@ -115,6 +115,10 @@ public class ClaimManager {
         claimCache.invalidateAll(uuids);
     }
 
+    public static void clearCache() {
+        claimCache.invalidateAll();
+    }
+
     public static List<OverlappingClaimAreaInfo> fetchOverlappingClaimAreas(String worldUuid, AreaBox areaBox) {
         return DataHandler.getDatabase().getSqlInstance().executeQuery(
                 """

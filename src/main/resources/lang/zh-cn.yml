@@ -170,6 +170,7 @@ claim:
       damage: "伤害 %material%"
       interact: "交互 %material%"
       spawn: "生成 %material%"
+    use: "使用 %material%"
     enter: "进入领地"
 
   group:

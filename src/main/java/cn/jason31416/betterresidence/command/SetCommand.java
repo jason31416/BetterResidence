@@ -102,7 +102,7 @@ public class SetCommand extends ChildCommand {
 
     private boolean shouldShowPermissionCompletion(String input, String permission) {
         return input.chars().filter(c->c=='.').count()==permission.chars().filter(c->c=='.').count()
-                && input.startsWith(permission.substring(0, permission.lastIndexOf('.')));
+                && (!permission.contains(".") || input.startsWith(permission.substring(0, permission.lastIndexOf('.'))));
     }
 
     private List<String> tabCompleteMaterial(String permission, String materialPrefix) {

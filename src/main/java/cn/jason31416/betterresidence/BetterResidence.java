@@ -42,15 +42,16 @@ public final class BetterResidence extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new ProtectionEventListener(), this);
 
             PluginLogger.send(Lang.getMessage("console.loaded"));
-        }catch (Exception e){
-            PluginLogger.error("Found illegal config: "+e.getMessage());
+        } catch (Exception e) {
+            PluginLogger.error("Found illegal config: " + e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        // todo: Test
+        // This is for testing purposes.
         createTestClaim();
     }
 
+    // For testing, do not delete during development stages.
     private void createTestClaim() {
         String name = "test-claim";
         boolean exists = DataHandler.getDatabase().select("claim")
@@ -82,6 +83,7 @@ public final class BetterResidence extends JavaPlugin {
         ClaimNameValidator.validateConfig();
         DefaultClaimGroupRegistry.loadConfig();
         TargetGroup.loadConfig();
+        ClaimManager.clearCache();
     }
 
     @Override

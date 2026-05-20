@@ -142,6 +142,7 @@ public final class PermissionRegistry {
         registerPermission("block.break", PermissionTargetType.BLOCK);
         registerPermission("block.place", PermissionTargetType.BLOCK);
         registerPermission("block.interact", PermissionTargetType.BLOCK);
+        registerPermission("use", PermissionTargetType.MATERIAL);
         registerPermission("entity.damage", PermissionTargetType.ENTITY);
         registerPermission("entity.interact", PermissionTargetType.ENTITY);
         registerPermission("entity.spawn", PermissionTargetType.ENTITY);

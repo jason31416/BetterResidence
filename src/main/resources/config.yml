@@ -56,6 +56,9 @@ claim:
     allow-visitor-entry:
       permission: "enter"
       weight: 0
+    allow-visitor-use:
+      permission: "use"
+      weight: 0
 
 # Visualizer settings control particle-based area previews.
 visualizer:

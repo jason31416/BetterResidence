@@ -329,6 +329,15 @@ public class ProtectionEventListener implements Listener {
         SimplePlayer player = SimplePlayer.of(event.getPlayer());
         Block clickedBlock = event.getClickedBlock();
         ItemStack item = event.getItem();
+        if (item != null) {
+            SimpleLocation location = clickedBlock == null
+                    ? SimpleLocation.of(event.getPlayer().getLocation())
+                    : SimpleLocation.of(clickedBlock);
+            handlePlayerEvent(event, player, location, "use", target(item.getType()));
+        }
+        if (event.isCancelled()) {
+            return;
+        }
         if (clickedBlock != null && action == Action.PHYSICAL) {
             Material material = clickedBlock.getType();
             // Physical actions can either damage the block itself or simply activate it.
