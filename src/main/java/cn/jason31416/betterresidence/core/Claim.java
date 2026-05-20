@@ -207,7 +207,14 @@ public class Claim {
     }
 
     public String getFlag(FlagRegistry.RegisteredFlag flag) {
-        return getStringFlag(flag.id(), flag.defaultValue());
+        if(claimFlags == null) fetchClaimFlags();
+        for (FlagRegistry.RegisteredFlag currentFlag : FlagRegistry.getFlagAndParents(flag)) {
+            String value = claimFlags.get(currentFlag.id());
+            if (value != null) {
+                return value;
+            }
+        }
+        return flag.defaultValue();
     }
 
     public Map<String, String> getStoredFlags() {

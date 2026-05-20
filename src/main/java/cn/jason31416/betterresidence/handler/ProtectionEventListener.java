@@ -2,26 +2,39 @@ package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
+import cn.jason31416.betterresidence.core.FlagRegistry;
+import cn.jason31416.betterresidence.BetterResidence;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Waterlogged;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Monster;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityMountEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -39,14 +52,23 @@ import org.bukkit.event.player.PlayerUnleashEntityEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class ProtectionEventListener implements Listener {
+    private static final String FALLING_BLOCK_ORIGIN_CLAIM_KEY = "falling_block_origin_claim";
+
+    private final NamespacedKey fallingBlockOriginClaimKey = new NamespacedKey(BetterResidence.getInstance(), FALLING_BLOCK_ORIGIN_CLAIM_KEY);
+
     private void sendProhibitedMessage(SimplePlayer player, String missingPermission, @Nullable String material, String groupName){
         String permission = material==null?missingPermission:missingPermission+":"+material.toLowerCase(Locale.ROOT);
         String materialTranslationKey="";
@@ -205,6 +227,49 @@ public class ProtectionEventListener implements Listener {
         return material.isBlock() || bucketPlacementMaterial(material) != null || spawnEntityType(material) != null;
     }
 
+    private @Nullable Claim claimAt(SimpleLocation location) {
+        return ClaimManager.findClaimAt(location);
+    }
+
+    private @Nullable String claimUuidAt(SimpleLocation location) {
+        Claim claim = claimAt(location);
+        return claim == null ? null : claim.getUuid();
+    }
+
+    private @Nullable String claimUuidAt(Location location) {
+        return claimUuidAt(SimpleLocation.of(location));
+    }
+
+    private boolean isSameClaimContext(SimpleLocation first, SimpleLocation second) {
+        return Objects.equals(claimUuidAt(first), claimUuidAt(second));
+    }
+
+    private String getFlagValue(SimpleLocation location, String flagId) {
+        Claim claim = claimAt(location);
+        if (claim == null) {
+            return "true";
+        }
+        return FlagRegistry.getFlag(flagId)
+                .map(claim::getFlag)
+                .orElse("true");
+    }
+
+    private boolean isBooleanFlagAllowed(SimpleLocation location, String flagId) {
+        return Boolean.parseBoolean(getFlagValue(location, flagId));
+    }
+
+    private boolean shouldBlockByBooleanFlag(SimpleLocation location, String flagId) {
+        return !isBooleanFlagAllowed(location, flagId);
+    }
+
+    private void removeBlocksDeniedByFlag(List<Block> blocks, String flagId) {
+        blocks.removeIf(block -> shouldBlockByBooleanFlag(SimpleLocation.of(block), flagId));
+    }
+
+    private void removeBlockStatesDeniedByFlag(List<BlockState> states, String fallbackFlagId) {
+        states.removeIf(state -> shouldBlockByBooleanFlag(SimpleLocation.of(state.getLocation()), growthFlag(state.getType(), fallbackFlagId)));
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         SimpleLocation location = SimpleLocation.of(event.getBlock());
@@ -302,6 +367,331 @@ public class ProtectionEventListener implements Listener {
         // Do not turn ordinary placement into block.interact. Interactable blocks still need this
         // check so containers, doors, buttons, etc. stay protected even while holding a block item.
         return clickedBlock.getType().isInteractable() || !isPlacementLikeItem(item);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onLiquidFlow(BlockFromToEvent event) {
+        String flag = flowFlag(event.getBlock());
+        if (flag == null) {
+            return;
+        }
+        SimpleLocation from = SimpleLocation.of(event.getBlock());
+        SimpleLocation to = SimpleLocation.of(event.getToBlock());
+        String fromMode = getClaimFlowMode(from, flag);
+        String toMode = getClaimFlowMode(to, flag);
+        boolean crossingClaimBoundary = !isSameClaimContext(from, to);
+
+        if (fromMode.equals("deny") || toMode.equals("deny")) {
+            event.setCancelled(true);
+            return;
+        }
+        if (crossingClaimBoundary && (fromMode.equals("internal") || toMode.equals("internal"))) {
+            event.setCancelled(true);
+        }
+    }
+
+    private String getClaimFlowMode(SimpleLocation location, String flag) {
+        return claimAt(location) == null ? "allow" : getFlagValue(location, flag);
+    }
+
+    private @Nullable String flowFlag(Block block) {
+        Material material = block.getType();
+        if (material == Material.WATER) {
+            return "flow.water";
+        }
+        if (material == Material.LAVA) {
+            return "flow.lava";
+        }
+        // Waterlogged blocks can be the source of BlockFromToEvent while retaining their own material.
+        if (block.getBlockData() instanceof Waterlogged waterlogged && waterlogged.isWaterlogged()) {
+            return "flow.water";
+        }
+        return null;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonExtend(BlockPistonExtendEvent event) {
+        for (Block block : event.getBlocks()) {
+            if (shouldBlockPistonMove(SimpleLocation.of(block), SimpleLocation.of(block.getRelative(event.getDirection())))) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPistonRetract(BlockPistonRetractEvent event) {
+        for (Block block : event.getBlocks()) {
+            if (shouldBlockPistonMove(SimpleLocation.of(block), SimpleLocation.of(block.getRelative(event.getDirection().getOppositeFace())))) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    private boolean shouldBlockPistonMove(SimpleLocation from, SimpleLocation to) {
+        if (isSameClaimContext(from, to)) {
+            return false;
+        }
+        // Piston flags only control cross-border movement; internal piston contraptions remain allowed.
+        return shouldBlockByBooleanFlag(from, "piston.cross-border") || shouldBlockByBooleanFlag(to, "piston.cross-border");
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event) {
+        removeBlocksDeniedByFlag(event.blockList(), explosionFlag(event.getEntity()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockExplode(BlockExplodeEvent event) {
+        String flag = switch (event.getBlock().getType()) {
+            case RED_BED, BLUE_BED, BLACK_BED, BROWN_BED, CYAN_BED, GRAY_BED, GREEN_BED, LIGHT_BLUE_BED,
+                 LIGHT_GRAY_BED, LIME_BED, MAGENTA_BED, ORANGE_BED, PINK_BED, PURPLE_BED, WHITE_BED, YELLOW_BED -> "explosion.bed";
+            case RESPAWN_ANCHOR -> "explosion.respawn-anchor";
+            default -> "explosion.other";
+        };
+        removeBlocksDeniedByFlag(event.blockList(), flag);
+    }
+
+    private String explosionFlag(Entity entity) {
+        if (entity instanceof Creeper) {
+            return "explosion.creeper";
+        }
+        if (entity instanceof Wither || entity instanceof WitherSkull) {
+            return "explosion.wither";
+        }
+        if (entity instanceof Fireball) {
+            return "explosion.fireball";
+        }
+        return switch (entity.getType()) {
+            case TNT, TNT_MINECART -> "explosion.tnt";
+            case END_CRYSTAL -> "explosion.crystal";
+            default -> "explosion.other";
+        };
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockIgnite(BlockIgniteEvent event) {
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), "fire.ignite")) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockBurn(BlockBurnEvent event) {
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), "fire.burn")) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockSpread(BlockSpreadEvent event) {
+        String flag = isFire(event.getSource().getType()) || isFire(event.getNewState().getType())
+                ? "fire.spread"
+                : growthFlag(event.getNewState().getType(), "growth.other");
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), flag)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean isFire(Material material) {
+        return material == Material.FIRE || material == Material.SOUL_FIRE;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        if (event.getEntity() instanceof FallingBlock fallingBlock) {
+            // Falling blocks are handled by origin tracking: only outside-to-inside landings are denied.
+            if (shouldBlockFallingBlockLanding(fallingBlock, event.getBlock())) {
+                event.setCancelled(true);
+            }
+            return;
+        }
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), entityChangeBlockFlag(event.getEntity()))) {
+            event.setCancelled(true);
+        }
+    }
+
+    private String entityChangeBlockFlag(Entity entity) {
+        if (entity instanceof Wither || entity instanceof WitherSkull) {
+            return "entity-change-block.wither";
+        }
+        return switch (entity.getType()) {
+            case ENDERMAN -> "entity-change-block.enderman";
+            case RAVAGER -> "entity-change-block.ravager";
+            case SHEEP -> "entity-change-block.sheep";
+            case SILVERFISH -> "entity-change-block.silverfish";
+            default -> "entity-change-block.other";
+        };
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFallingBlockSpawn(EntitySpawnEvent event) {
+        if (!(event.getEntity() instanceof FallingBlock fallingBlock)) {
+            return;
+        }
+        String originClaimUuid = claimUuidAt(fallingBlock.getLocation());
+        if (originClaimUuid == null) {
+            originClaimUuid = "";
+        }
+        // Store origin on the entity itself so no map cleanup is required and no memory leak is possible.
+        fallingBlock.getPersistentDataContainer().set(fallingBlockOriginClaimKey, PersistentDataType.STRING, originClaimUuid);
+    }
+
+    private boolean shouldBlockFallingBlockLanding(FallingBlock fallingBlock, Block landingBlock) {
+        String destinationClaimUuid = claimUuidAt(SimpleLocation.of(landingBlock));
+        if (destinationClaimUuid == null) {
+            return false;
+        }
+        PersistentDataContainer data = fallingBlock.getPersistentDataContainer();
+        String originClaimUuid = data.get(fallingBlockOriginClaimKey, PersistentDataType.STRING);
+        if (originClaimUuid == null || originClaimUuid.isEmpty()) {
+            return true;
+        }
+        return !originClaimUuid.equals(destinationClaimUuid);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockGrow(BlockGrowEvent event) {
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), growthFlag(event.getNewState().getType(), "growth.other"))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockFertilize(BlockFertilizeEvent event) {
+        removeBlockStatesDeniedByFlag(event.getBlocks(), "growth.other");
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onStructureGrow(StructureGrowEvent event) {
+        removeBlockStatesDeniedByFlag(event.getBlocks(), "growth.tree");
+    }
+
+    private String growthFlag(Material material, String fallbackFlag) {
+        String name = material.name();
+        if (name.endsWith("_SAPLING") || name.endsWith("_LEAVES") || name.endsWith("_LOG") || name.endsWith("_WOOD")) {
+            return "growth.tree";
+        }
+        if (name.contains("VINE")) {
+            return "growth.vine";
+        }
+        if (name.contains("MUSHROOM")) {
+            return "growth.mushroom";
+        }
+        if (name.contains("SCULK")) {
+            return "growth.sculk";
+        }
+        if (name.contains("AMETHYST")) {
+            return "growth.amethyst";
+        }
+        return switch (material) {
+            case WHEAT, CARROTS, POTATOES, BEETROOTS, COCOA, NETHER_WART, SWEET_BERRY_BUSH -> "growth.crop";
+            case MELON_STEM, ATTACHED_MELON_STEM, PUMPKIN_STEM, ATTACHED_PUMPKIN_STEM, MELON, PUMPKIN -> "growth.stem";
+            case GRASS_BLOCK, SHORT_GRASS, TALL_GRASS, FERN, LARGE_FERN, MYCELIUM -> "growth.grass";
+            case BAMBOO, BAMBOO_SAPLING -> "growth.bamboo";
+            case CACTUS -> "growth.cactus";
+            case SUGAR_CANE -> "growth.sugar-cane";
+            case KELP, KELP_PLANT -> "growth.kelp";
+            case CHORUS_FLOWER, CHORUS_PLANT -> "growth.chorus";
+            default -> fallbackFlag;
+        };
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onLeavesDecay(LeavesDecayEvent event) {
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), "decay.leaves")) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockFade(BlockFadeEvent event) {
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), decayFlag(event.getBlock().getType()))) {
+            event.setCancelled(true);
+        }
+    }
+
+    private String decayFlag(Material material) {
+        String name = material.name();
+        if (name.endsWith("_LEAVES")) {
+            return "decay.leaves";
+        }
+        if (name.contains("ICE")) {
+            return "decay.ice";
+        }
+        if (name.contains("SNOW")) {
+            return "decay.snow";
+        }
+        if (name.contains("CORAL")) {
+            return "decay.coral";
+        }
+        if (material == Material.FARMLAND) {
+            return "decay.farmland";
+        }
+        return "decay.other";
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBlockForm(BlockFormEvent event) {
+        if (shouldBlockByBooleanFlag(SimpleLocation.of(event.getBlock()), formFlag(event.getNewState().getType()))) {
+            event.setCancelled(true);
+        }
+    }
+
+    private String formFlag(Material material) {
+        String name = material.name();
+        if (name.contains("SNOW")) {
+            return "form.snow";
+        }
+        if (name.contains("ICE")) {
+            return "form.ice";
+        }
+        return switch (material) {
+            case STONE, COBBLESTONE, BASALT -> "form.stone";
+            case OBSIDIAN, CRYING_OBSIDIAN -> "form.obsidian";
+            case WHITE_CONCRETE, ORANGE_CONCRETE, MAGENTA_CONCRETE, LIGHT_BLUE_CONCRETE, YELLOW_CONCRETE,
+                 LIME_CONCRETE, PINK_CONCRETE, GRAY_CONCRETE, LIGHT_GRAY_CONCRETE, CYAN_CONCRETE,
+                 PURPLE_CONCRETE, BLUE_CONCRETE, BROWN_CONCRETE, GREEN_CONCRETE, RED_CONCRETE, BLACK_CONCRETE -> "form.concrete";
+            default -> "form.other";
+        };
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPortalCreate(PortalCreateEvent event) {
+        String flag = portalCreateFlag(event.getReason());
+        for (BlockState state : event.getBlocks()) {
+            if (shouldBlockByBooleanFlag(SimpleLocation.of(state.getLocation()), flag)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    private String portalCreateFlag(PortalCreateEvent.CreateReason reason) {
+        return switch (reason) {
+            case FIRE -> "portal-create.nether";
+            case END_PLATFORM -> "portal-create.end";
+            default -> "portal-create.custom";
+        };
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onCreatureSpawn(CreatureSpawnEvent event) {
+        if (!isEnvironmentalSpawnReason(event.getSpawnReason())) {
+            return;
+        }
+        String flag = event.getEntity() instanceof Monster ? "spawn.monster" : "spawn.animal";
+        if (shouldBlockByBooleanFlag(location(event.getEntity()), flag)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean isEnvironmentalSpawnReason(CreatureSpawnEvent.SpawnReason reason) {
+        return switch (reason) {
+            case NATURAL, SPAWNER -> true;
+            default -> false;
+        };
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

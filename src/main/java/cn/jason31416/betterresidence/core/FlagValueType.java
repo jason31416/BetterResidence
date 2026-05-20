@@ -2,8 +2,31 @@ package cn.jason31416.betterresidence.core;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 public interface FlagValueType {
+    FlagValueType STRING = Objects::nonNull;
+
+    FlagValueType INTEGER = value -> {
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    };
+
+    FlagValueType DECIMAL = value -> {
+        try {
+            Double.parseDouble(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    };
+
+    FlagValueType BOOL = new OptionsFlagValueType(List.of("true", "false"));
+
     boolean isValid(String value);
 
     default List<String> tabComplete(String input) {
@@ -11,33 +34,19 @@ public interface FlagValueType {
     }
 
     static FlagValueType string() {
-        return Objects::nonNull;
+        return STRING;
     }
 
     static FlagValueType integer() {
-        return value -> {
-            try {
-                Integer.parseInt(value);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        };
+        return INTEGER;
     }
 
     static FlagValueType decimal() {
-        return value -> {
-            try {
-                Double.parseDouble(value);
-                return true;
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        };
+        return DECIMAL;
     }
 
     static FlagValueType bool() {
-        return options("true", "false");
+        return BOOL;
     }
 
     static FlagValueType options(String... options) {
@@ -68,6 +77,22 @@ public interface FlagValueType {
             return options.stream()
                     .filter(option -> option.startsWith(input))
                     .toList();
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (!(object instanceof OptionsFlagValueType other)) {
+                return false;
+            }
+            return Set.copyOf(options).equals(Set.copyOf(other.options));
+        }
+
+        @Override
+        public int hashCode() {
+            return Set.copyOf(options).hashCode();
         }
     }
 }

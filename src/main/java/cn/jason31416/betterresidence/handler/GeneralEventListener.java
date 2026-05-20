@@ -116,10 +116,9 @@ public class GeneralEventListener implements Listener {
     }
 
     private Message getClaimMessage(Claim claim, String flag, String defaultMessageKey, Player player) {
-        String defaultValue = FlagRegistry.getFlag(flag)
-                .map(FlagRegistry.RegisteredFlag::defaultValue)
-                .orElse("");
-        String rawMessage = claim.getStringFlag(flag, defaultValue);
+        String rawMessage = FlagRegistry.getFlag(flag)
+                .map(claim::getFlag)
+                .orElseGet(() -> claim.getStringFlag(flag, ""));
         Message message = rawMessage.isBlank() ? Lang.getMessage(defaultMessageKey) : new StringMessage(rawMessage);
         return message.copy()
                 .add("claim", claim.getName())
