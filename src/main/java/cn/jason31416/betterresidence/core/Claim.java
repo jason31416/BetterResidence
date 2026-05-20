@@ -470,6 +470,9 @@ public class Claim {
      * Too simple too lazy to make doc
      */
     public boolean checkPlayerPermission(SimplePlayer player, String permission, @Nullable String target){
+        if (AdminModeManager.isAdminMode(player)) {
+            return true;
+        }
         return checkWeightPermission(getPlayerWeight(player), permission, target);
     }
 }

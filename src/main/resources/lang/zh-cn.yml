@@ -36,7 +36,9 @@ command:
   reload-success: "<highlight>BetterResidence <content>已重新加载"
   reload-failed: "<error-primary>错误: <error-content>BetterResidence 重新加载失败: <error-highlight>%error%"
 
-  admin-help: "<content>BetterResidence 管理命令: <highlight>/res admin fsck"
+  admin-help: "<content>BetterResidence 管理命令: <highlight>/res admin fsck<content>, <highlight>/res admin toggleadminmode"
+  admin-mode-enabled: "<content>管理模式已<highlight>开启<content>，你现在拥有所有领地权限"
+  admin-mode-disabled: "<content>管理模式已<highlight>关闭<content>，你现在按领地权限规则行动"
   fsck-started: "<content>已开始检查 BetterResidence 数据完整性..."
   fsck-check-completed: "<content>检查项 <highlight>%check% <content>已完成: %status% <muted>(异常数据行: <highlight>%rows%<muted>)"
   fsck-check-status-passed: "<green>通过"
