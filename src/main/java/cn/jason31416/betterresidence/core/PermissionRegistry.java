@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.core;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,31 +64,63 @@ public final class PermissionRegistry {
     }
 
     /**
-     * Return top-level namespaces inferred from registered dotted permission ids.
+     * Return registered permission ids plus inferred parent hierarchy ids.
      * <p>
-     * For example, {@code block.break} contributes {@code block}.
+     * For example, {@code admin.area.add} contributes {@code admin} and {@code admin.area}.
      *
-     * @return Registered permission namespaces.
+     * @return Permission ids that can be used in claim permission rules.
      */
-    public static Set<String> getNamespaces() {
-        return registry.keySet().stream()
-                .filter(permission -> permission.contains("."))
-                .map(permission -> permission.substring(0, permission.indexOf('.')))
-                .collect(Collectors.toUnmodifiableSet());
+    public static List<String> getHierarchyPermissionIds() {
+        Set<String> ids = new LinkedHashSet<>();
+        for (String permission : registry.keySet()) {
+            ids.add(permission);
+            ids.addAll(getParentPermissionIds(permission));
+        }
+        return List.copyOf(ids);
     }
 
     /**
-     * Resolve the target type for a wildcard namespace such as {@code block.*}.
-     * <p>
-     * A namespace target type can only be inferred when every registered permission under the
-     * namespace uses the same target type.
+     * Return inferred parent permission ids from nearest parent to root.
      *
-     * @param namespace The namespace without trailing {@code .*}.
-     * @return The shared target type, or empty if the namespace is unknown or mixed.
+     * @param permission The permission id, such as {@code a.b.c}.
+     * @return Parent ids, such as {@code a.b}, then {@code a}.
      */
-    public static Optional<PermissionTargetType> getNamespaceTargetType(String namespace) {
+    public static List<String> getParentPermissionIds(String permission) {
+        List<String> parents = new java.util.ArrayList<>();
+        int separator = permission.lastIndexOf('.');
+        while (separator >= 0) {
+            String parent = permission.substring(0, separator);
+            parents.add(parent);
+            separator = parent.lastIndexOf('.');
+        }
+        return List.copyOf(parents);
+    }
+
+    /**
+     * @param id The permission id without a {@code :target} suffix.
+     * @return Whether the permission id is registered or inferred as a parent hierarchy id.
+     */
+    public static boolean isHierarchyPermission(String id) {
+        return getHierarchyPermissionIds().contains(id);
+    }
+
+    /**
+     * Resolve the target type for a permission hierarchy id.
+     * <p>
+     * Parent permission ids can only use targets when every registered descendant uses the same
+     * target type.
+     *
+     * @param id The permission id without a {@code :target} suffix.
+     * @return The target type, or empty if the id is unknown or has mixed descendant target types.
+     */
+    public static Optional<PermissionTargetType> getHierarchyTargetType(String id) {
+        RegisteredPermission registeredPermission = registry.get(id);
+        if (registeredPermission != null) {
+            return Optional.of(registeredPermission.targetType());
+        }
+
         Set<PermissionTargetType> targetTypes = registry.values().stream()
-                .filter(permission -> permission.id().startsWith(namespace + "."))
+                .filter(permission -> permission.id().startsWith(id + "."))
                 .map(RegisteredPermission::targetType)
                 .collect(Collectors.toSet());
         if (targetTypes.size() != 1) {

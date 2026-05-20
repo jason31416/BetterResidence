@@ -14,7 +14,6 @@ import cn.jason31416.planetlib.util.Lang;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class SetCommand extends ChildCommand {
     public SetCommand(IParentCommand parent) {
@@ -37,7 +36,7 @@ public class SetCommand extends ChildCommand {
             return null;
         }
 
-        String permission = normalizePermission(context.getArg(0));
+        String permission = context.getArg(0);
         Optional<PermissionTargetType> targetType = getTargetType(permission);
         if (targetType.isEmpty()) {
             return Lang.getMessage("command.permission-not-found").copy()
@@ -87,16 +86,6 @@ public class SetCommand extends ChildCommand {
         return ClaimManager.findClaimAt(context.player().getLocation());
     }
 
-    private String normalizePermission(String permission) {
-        int targetSeparator = permission.indexOf(':');
-        String basePermission = targetSeparator >= 0 ? permission.substring(0, targetSeparator) : permission;
-        String target = targetSeparator >= 0 ? permission.substring(targetSeparator) : "";
-        if (!PermissionRegistry.isRegistered(basePermission) && isPermissionNamespace(basePermission)) {
-            return basePermission + ".*" + target;
-        }
-        return permission;
-    }
-
     private List<String> tabCompletePermission(String input) {
         int materialSeparator = input.indexOf(':');
         if (materialSeparator >= 0) {
@@ -105,23 +94,15 @@ public class SetCommand extends ChildCommand {
             return tabCompleteMaterial(permission, materialPrefix);
         }
 
-        return Stream.concat(PermissionRegistry.getPermissionIds().stream(), PermissionRegistry.getNamespaces().stream())
-                .distinct()
+        return PermissionRegistry.getHierarchyPermissionIds().stream()
                 .filter(permission -> permission.startsWith(input))
                 .filter(permission -> shouldShowPermissionCompletion(input, permission))
                 .toList();
     }
 
-    private boolean isPermissionNamespace(String permission) {
-        return !permission.contains(".")
-                && !permission.contains(":")
-                && PermissionRegistry.getNamespaces().contains(permission);
-    }
-
     private boolean shouldShowPermissionCompletion(String input, String permission) {
-        return input.contains(".")
-                || !permission.contains(".")
-                || permission.substring(0, permission.indexOf('.')).equals(input);
+        return input.chars().filter(c->c=='.').count()==permission.chars().filter(c->c=='.').count()
+                && input.startsWith(permission.substring(0, permission.lastIndexOf('.')));
     }
 
     private List<String> tabCompleteMaterial(String permission, String materialPrefix) {
@@ -129,7 +110,7 @@ public class SetCommand extends ChildCommand {
             return List.of();
         }
 
-        Optional<PermissionTargetType> targetType = getTargetType(normalizePermission(permission));
+        Optional<PermissionTargetType> targetType = getTargetType(permission);
         if (targetType.isEmpty()) {
             return List.of();
         }
@@ -141,10 +122,18 @@ public class SetCommand extends ChildCommand {
 
     private Optional<PermissionTargetType> getTargetType(String permission) {
         String basePermission = getBasePermission(permission);
-        if (basePermission.endsWith(".*")) {
-            return PermissionRegistry.getNamespaceTargetType(basePermission.substring(0, basePermission.length() - 2));
+        if (basePermission.equals("*")) {
+            return Optional.of(permission.contains(":") ? PermissionTargetType.BLOCK : PermissionTargetType.NONE);
         }
-        return PermissionRegistry.getPermission(basePermission).map(PermissionRegistry.RegisteredPermission::targetType);
+
+        Optional<PermissionTargetType> targetType = PermissionRegistry.getHierarchyTargetType(basePermission);
+        if (targetType.isPresent() || permission.contains(":")) {
+            return targetType;
+        }
+        if (PermissionRegistry.isHierarchyPermission(basePermission)) {
+            return Optional.of(PermissionTargetType.NONE);
+        }
+        return Optional.empty();
     }
 
     private String getBasePermission(String permission) {

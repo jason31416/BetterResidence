@@ -37,7 +37,7 @@ public class PermissionNode {
     public int getPermissionPriority(String permission) {
         // Exact permission nodes beat wildcard nodes, regardless of material specificity.
         if (name.equals(permission)) {
-            return 2;
+            return Integer.MAX_VALUE;
         }
 
         // Global wildcard applies to every permission, but has the lowest name priority.
@@ -45,12 +45,8 @@ public class PermissionNode {
             return 0;
         }
 
-        // Category wildcards such as block.* match block.break, block.place, etc.
-        if (name.endsWith(".*")) {
-            String prefix = name.substring(0, name.length() - 1);
-            if (permission.startsWith(prefix)) {
-                return 1;
-            }
+        if (PermissionRegistry.getParentPermissionIds(permission).contains(name)) {
+            return 1 + name.length();
         }
 
         return -1; // This node doesn't match the permission

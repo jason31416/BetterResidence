@@ -458,7 +458,7 @@ public class Claim {
                 .filter(node->node.getPermissionPriority(permission)>=0)
                 .filter(node->node.getTargetPriority(targetType, target)>=0)
                 // Permission-name specificity is compared before material specificity.
-                // Example: block.break:all must beat block.*:grass_block.
+                // Example: block.break:all must beat block:grass_block.
                 .max(Comparator
                         .comparingInt((PermissionNode node) -> node.getPermissionPriority(permission))
                         .thenComparingInt(node -> node.getTargetPriority(targetType, target)));

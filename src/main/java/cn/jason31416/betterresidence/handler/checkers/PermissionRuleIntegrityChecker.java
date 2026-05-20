@@ -76,7 +76,10 @@ public final class PermissionRuleIntegrityChecker implements DataIntegrityHandle
 
         Optional<PermissionTargetType> targetType = getTargetType(basePermission);
         if (targetType.isEmpty()) {
-            return "permission base is not registered";
+            if (target == null && PermissionRegistry.isHierarchyPermission(basePermission)) {
+                return null;
+            }
+            return "permission base is not registered or does not support targets";
         }
         if (target != null && targetType.get().equals(PermissionTargetType.NONE)) {
             return "permission does not support targets";
@@ -95,10 +98,7 @@ public final class PermissionRuleIntegrityChecker implements DataIntegrityHandle
                     (targetType, ruleTarget, checkedTarget) -> 0
             ));
         }
-        if (basePermission.endsWith(".*")) {
-            return PermissionRegistry.getNamespaceTargetType(basePermission.substring(0, basePermission.length() - 2));
-        }
-        return PermissionRegistry.getPermission(basePermission).map(PermissionRegistry.RegisteredPermission::targetType);
+        return PermissionRegistry.getHierarchyTargetType(basePermission);
     }
 
     private boolean isValidTarget(PermissionTargetType targetType, String target) {

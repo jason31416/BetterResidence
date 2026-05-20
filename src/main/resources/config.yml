@@ -48,7 +48,7 @@ claim:
       permission: "*:all"
       weight: 800
     admin: # By default, only owner/admins should be able to grant/revoke permission and edit claim settings.
-      permission: "admin.*"
+      permission: "admin"
       weight: 900
     owner-only-deletion:
       permission: "admin.removeclaim"

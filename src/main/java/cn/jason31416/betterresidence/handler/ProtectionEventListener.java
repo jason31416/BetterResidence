@@ -501,6 +501,10 @@ public class ProtectionEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
         if (event.getEntity() instanceof FallingBlock fallingBlock) {
+            if (event.getTo() == Material.AIR) {
+                storeFallingBlockOrigin(fallingBlock, event.getBlock().getLocation());
+                return;
+            }
             // Falling blocks are handled by origin tracking: only outside-to-inside landings are denied.
             if (shouldBlockFallingBlockLanding(fallingBlock, event.getBlock())) {
                 event.setCancelled(true);
@@ -530,7 +534,11 @@ public class ProtectionEventListener implements Listener {
         if (!(event.getEntity() instanceof FallingBlock fallingBlock)) {
             return;
         }
-        String originClaimUuid = claimUuidAt(fallingBlock.getLocation());
+        storeFallingBlockOrigin(fallingBlock, fallingBlock.getLocation());
+    }
+
+    private void storeFallingBlockOrigin(FallingBlock fallingBlock, Location origin) {
+        String originClaimUuid = claimUuidAt(origin);
         if (originClaimUuid == null) {
             originClaimUuid = "";
         }
