@@ -97,7 +97,6 @@ public final class PermissionRegistry {
     }
 
     static {
-        registerPermission("block.break", PermissionTargetType.BLOCK);
         registerPermission("admin.trust", PermissionTargetType.NONE);
         registerPermission("admin.setpermission", PermissionTargetType.NONE);
         registerPermission("admin.removeclaim", PermissionTargetType.NONE);
@@ -105,10 +104,14 @@ public final class PermissionRegistry {
         registerPermission("admin.area.add", PermissionTargetType.NONE);
         registerPermission("admin.area.remove", PermissionTargetType.NONE);
         registerPermission("admin.area.list", PermissionTargetType.NONE);
-//        registerPermission("block.place", PermissionTargetType.BLOCK);
-//        registerPermission("block.interact", PermissionTargetType.BLOCK);
-//        registerPermission("entity.damage", PermissionTargetType.ENTITY); // Allow player to hit entity
-//        registerPermission("entity.interact", PermissionTargetType.ENTITY);
+
+        registerPermission("block.break", PermissionTargetType.BLOCK);
+        registerPermission("block.place", PermissionTargetType.BLOCK);
+        registerPermission("block.interact", PermissionTargetType.BLOCK);
+        registerPermission("entity.damage", PermissionTargetType.ENTITY);
+        registerPermission("entity.interact", PermissionTargetType.ENTITY);
+        registerPermission("entity.spawn", PermissionTargetType.ENTITY);
+        registerPermission("enter", PermissionTargetType.NONE);
     }
 
     /**

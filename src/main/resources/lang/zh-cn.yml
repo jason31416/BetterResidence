@@ -152,6 +152,13 @@ claim:
   action:
     block:
       break: "破坏 %material%"
+      place: "放置 %material%"
+      interact: "交互 %material%"
+    entity:
+      damage: "伤害 %material%"
+      interact: "交互 %material%"
+      spawn: "生成 %material%"
+    enter: "进入领地"
 
   group:
     none: "访客"
@@ -159,6 +166,7 @@ claim:
     blacklisted: "黑名单"
     trusted: "成员"
     owner: "所有者"
+    admin: "管理者"
 
 target-group:
   block:
