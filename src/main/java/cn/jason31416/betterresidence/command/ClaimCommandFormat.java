@@ -26,8 +26,7 @@ final class ClaimCommandFormat {
         }
         return value
                 .replace("\\", "\\\\")
-                .replace("<", "\\<")
-                .replace(">", "\\>");
+                .replace("<", "\\<");
     }
 
     static String shortUuid(String uuid) {

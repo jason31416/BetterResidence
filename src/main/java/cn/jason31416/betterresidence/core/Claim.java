@@ -206,6 +206,36 @@ public class Claim {
         return claimFlags.getOrDefault(flag, defaultValue);
     }
 
+    public String getFlag(FlagRegistry.RegisteredFlag flag) {
+        return getStringFlag(flag.id(), flag.defaultValue());
+    }
+
+    public Map<String, String> getStoredFlags() {
+        if (claimFlags == null) fetchClaimFlags();
+        return Map.copyOf(claimFlags);
+    }
+
+    public boolean setFlag(String flag, String value) {
+        Optional<FlagRegistry.RegisteredFlag> registeredFlag = FlagRegistry.getFlag(flag);
+        if (registeredFlag.isEmpty() || !registeredFlag.get().isValidValue(value)) {
+            return false;
+        }
+
+        DataHandler.getDatabase().delete("claim_flags")
+                .keyEquals("claim_uuid", uuid)
+                .keyEquals("flag", flag)
+                .executeUpdate();
+        if (!value.equals(registeredFlag.get().defaultValue())) {
+            DataHandler.getDatabase().insert("claim_flags")
+                    .value("flag", flag)
+                    .value("value", value)
+                    .value("claim_uuid", uuid)
+                    .executeUpdate();
+        }
+        claimFlags = null;
+        return true;
+    }
+
     public int getIntFlag(String flag, int defaultValue) {
         try {
             return Integer.parseInt(getStringFlag(flag, ""+defaultValue));

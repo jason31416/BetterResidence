@@ -3,6 +3,7 @@ package cn.jason31416.betterresidence.handler;
 import cn.jason31416.betterresidence.BetterResidence;
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
+import cn.jason31416.betterresidence.core.FlagRegistry;
 import cn.jason31416.betterresidence.selection.ClaimCreationValidator;
 import cn.jason31416.betterresidence.selection.SelectionManager;
 import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
@@ -33,8 +34,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class GeneralEventListener implements Listener {
-    private static final String ENTER_MESSAGE_FLAG = "enter-message";
-    private static final String LEAVE_MESSAGE_FLAG = "leave-message";
     private static final long SELECTION_DISPLAY_PERIOD_MILLIS = 500L;
 
     public GeneralEventListener() {
@@ -102,13 +101,13 @@ public class GeneralEventListener implements Listener {
         }
 
         if (toClaim != null) {
-            getClaimMessage(toClaim, ENTER_MESSAGE_FLAG, "claim.entered", player).sendActionbar(player);
+            getClaimMessage(toClaim, "enter-message", "claim.entered", player).sendActionbar(player);
         }
 
         if (fromClaim != null) {
             flashClaimAreas(player, fromClaim);
             if (toClaim == null) {
-                getClaimMessage(fromClaim, LEAVE_MESSAGE_FLAG, "claim.left", player).sendActionbar(player);
+                getClaimMessage(fromClaim, "leave-message", "claim.left", player).sendActionbar(player);
             }
         }
         if (toClaim != null) {
@@ -117,7 +116,10 @@ public class GeneralEventListener implements Listener {
     }
 
     private Message getClaimMessage(Claim claim, String flag, String defaultMessageKey, Player player) {
-        String rawMessage = claim.getStringFlag(flag, "");
+        String defaultValue = FlagRegistry.getFlag(flag)
+                .map(FlagRegistry.RegisteredFlag::defaultValue)
+                .orElse("");
+        String rawMessage = claim.getStringFlag(flag, defaultValue);
         Message message = rawMessage.isBlank() ? Lang.getMessage(defaultMessageKey) : new StringMessage(rawMessage);
         return message.copy()
                 .add("claim", claim.getName())

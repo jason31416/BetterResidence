@@ -99,6 +99,7 @@ public final class PermissionRegistry {
     static {
         registerPermission("admin.trust", PermissionTargetType.NONE);
         registerPermission("admin.setpermission", PermissionTargetType.NONE);
+        registerPermission("admin.setflag", PermissionTargetType.NONE);
         registerPermission("admin.removeclaim", PermissionTargetType.NONE);
         registerPermission("admin.subclaim", PermissionTargetType.NONE);
         registerPermission("admin.area.add", PermissionTargetType.NONE);
