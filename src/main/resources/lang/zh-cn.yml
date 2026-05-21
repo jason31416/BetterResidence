@@ -76,6 +76,16 @@ command:
   create-success: "<content>已创建领地 <highlight>%claim%<content>，大小 <highlight>%size% <content>方块，花费 <highlight>%price%"
   create-subclaim-success: "<content>已在领地 <highlight>%parent% <content>内创建子领地 <highlight>%claim%<content>，大小 <highlight>%size% <content>方块"
 
+  rename-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res rename <新领地名>"
+  rename-invalid-name: "<error-primary>错误: <error-content>领地名 <error-highlight>%claim% <error-content>不合法，必须匹配正则: <error-highlight>%regex%"
+  rename-name-exists: "<error-primary>错误: <error-content>领地 <error-highlight>%claim% <error-content>已存在"
+  rename-same-name: "<error-primary>错误: <error-content>领地名已经是 <error-highlight>%claim%"
+  rename-success: "<content>已将领地 <highlight>%old-claim% <content>重命名为 <highlight>%claim%"
+
+  setowner-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res setowner <玩家>"
+  setowner-same-owner: "<error-primary>错误: <error-content><error-highlight>%player% <error-content>已经是领地 <error-highlight>%claim% <error-content>的所有者"
+  setowner-success: "<content>已将领地 <highlight>%claim% <content>的所有者转移给 <highlight>%player%"
+
   remove-no-pending: "<error-primary>错误: <error-content>没有待确认的删除操作，请先输入 <error-highlight>/res remove"
   remove-expired: "<error-primary>错误: <error-content>删除确认已过期，请重新输入 <error-highlight>/res remove"
   remove-success: "<content>已删除领地 <highlight>%claim%<content>，<highlight>%promoted-count% <content>个直接子领地已升级到 <highlight>%parent%"

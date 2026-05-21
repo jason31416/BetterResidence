@@ -134,6 +134,7 @@ public final class PermissionRegistry {
         registerPermission("admin.setpermission", PermissionTargetType.NONE);
         registerPermission("admin.setflag", PermissionTargetType.NONE);
         registerPermission("admin.removeclaim", PermissionTargetType.NONE);
+        registerPermission("admin.rename", PermissionTargetType.NONE);
         registerPermission("admin.subclaim", PermissionTargetType.NONE);
         registerPermission("admin.area.add", PermissionTargetType.NONE);
         registerPermission("admin.area.remove", PermissionTargetType.NONE);

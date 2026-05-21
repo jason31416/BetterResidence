@@ -98,6 +98,22 @@ public class ClaimManager {
                 .isPresent();
     }
 
+    public static void renameClaim(String claimUuid, String newName) {
+        DataHandler.getDatabase().update("claim")
+                .value("name", newName)
+                .keyEquals("uuid", claimUuid)
+                .executeUpdate();
+        invalidateClaim(claimUuid);
+    }
+
+    public static void setClaimOwner(String claimUuid, SimplePlayer newOwner) {
+        DataHandler.getDatabase().update("claim")
+                .value("owner_uuid", newOwner.getUUID().toString())
+                .keyEquals("uuid", claimUuid)
+                .executeUpdate();
+        invalidateClaim(claimUuid);
+    }
+
     @Nullable
     public static Claim resolveClaim(String input) {
         Claim claim = fetchClaimByName(input);
