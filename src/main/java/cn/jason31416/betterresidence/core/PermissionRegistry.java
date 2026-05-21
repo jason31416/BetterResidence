@@ -144,11 +144,14 @@ public final class PermissionRegistry {
         registerPermission("block.place", PermissionTargetType.BLOCK);
         registerPermission("block.interact", PermissionTargetType.BLOCK);
         registerPermission("use", PermissionTargetType.MATERIAL);
+        registerPermission("dropitem.throw", PermissionTargetType.MATERIAL);
+        registerPermission("dropitem.pickup", PermissionTargetType.MATERIAL);
         registerPermission("teleport", PermissionTargetType.NONE);
         registerPermission("entity.damage", PermissionTargetType.ENTITY);
         registerPermission("entity.interact", PermissionTargetType.ENTITY);
         registerPermission("entity.spawn", PermissionTargetType.ENTITY);
         registerPermission("enter", PermissionTargetType.NONE);
+        registerPermission("fly", PermissionTargetType.NONE);
     }
 
     /**

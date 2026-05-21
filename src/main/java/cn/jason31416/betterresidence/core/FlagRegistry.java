@@ -98,6 +98,8 @@ public final class FlagRegistry {
         registerFlag("enter-message", FlagValueType.string(), "");
         registerFlag("leave-message", FlagValueType.string(), "");
         registerFlag("teleport-location", FlagValueType.string(), "");
+        registerFlag("time", FlagValueType.integer(), "-1");
+        registerFlag("weather", FlagValueType.options("global", "clear", "rain"), "global");
 
         FlagValueType flowMode = FlagValueType.options("allow", "internal", "deny");
         registerFlag("flow", flowMode, "internal");

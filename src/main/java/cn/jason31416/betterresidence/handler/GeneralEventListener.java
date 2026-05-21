@@ -18,6 +18,7 @@ import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.WeatherType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -98,6 +99,9 @@ public class GeneralEventListener implements Listener {
         Claim fromClaim = ClaimManager.findClaimAt(SimpleLocation.of(from));
         Claim toClaim = ClaimManager.findClaimAt(SimpleLocation.of(to));
 
+        applyClaimTime(player, toClaim);
+        applyClaimWeather(player, toClaim);
+
         String fromClaimUuid = fromClaim == null ? null : fromClaim.getUuid();
         String toClaimUuid = toClaim == null ? null : toClaim.getUuid();
         if (Objects.equals(fromClaimUuid, toClaimUuid)) {
@@ -116,6 +120,46 @@ public class GeneralEventListener implements Listener {
         }
         if (toClaim != null) {
             flashClaimAreas(player, toClaim);
+        }
+    }
+
+    private void applyClaimTime(Player player, Claim claim) {
+        if (claim == null) {
+            player.resetPlayerTime();
+            return;
+        }
+
+        int time = FlagRegistry.getFlag("time")
+                .map(flag -> parseClaimTime(claim.getFlag(flag)))
+                .orElse(-1);
+        if (time > 0) {
+            player.setPlayerTime(time, false);
+        } else {
+            player.resetPlayerTime();
+        }
+    }
+
+    private int parseClaimTime(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException ignored) {
+            return -1;
+        }
+    }
+
+    private void applyClaimWeather(Player player, Claim claim) {
+        if (claim == null) {
+            player.resetPlayerWeather();
+            return;
+        }
+
+        String weather = FlagRegistry.getFlag("weather")
+                .map(claim::getFlag)
+                .orElse("global");
+        switch (weather) {
+            case "clear" -> player.setPlayerWeather(WeatherType.CLEAR);
+            case "rain" -> player.setPlayerWeather(WeatherType.DOWNFALL);
+            default -> player.resetPlayerWeather();
         }
     }
 

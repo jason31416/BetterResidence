@@ -59,6 +59,12 @@ claim:
     allow-visitor-use:
       permission: "use"
       weight: 0
+    allow-visitor-fly:
+      permission: "fly"
+      weight: 0
+    allow-visitor-dropitem-throw-pickup:
+      permission: "dropitem"
+      weight: 0
 
   teleport:
     # Seconds players must stand still before /res tp teleports them. Use 0 to disable warmup.

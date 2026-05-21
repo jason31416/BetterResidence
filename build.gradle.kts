@@ -36,7 +36,7 @@ tasks.withType<JavaCompile> {
 tasks.runServer {
     minecraftVersion("1.21.8")
     doFirst {
-        delete(layout.projectDirectory.dir("run/plugins/BetterResidence"))
+//        delete(layout.projectDirectory.dir("run/plugins/BetterResidence"))
     }
 }
 

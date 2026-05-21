@@ -226,12 +226,6 @@ entity:
       - "zoglin"
       - "zombie"
       - "zombie_villager"
-  bosses:
-    name: "target-group.entity.bosses"
-    priority: 3
-    targets:
-      - "ender_dragon"
-      - "wither"
   neutral_mobs:
     name: "target-group.entity.neutral_mobs"
     priority: 2
@@ -326,14 +320,6 @@ entity:
       - "trident"
       - "wind_charge"
       - "wither_skull"
-  displays:
-    name: "target-group.entity.displays"
-    priority: 3
-    targets:
-      - "block_display"
-      - "item_display"
-      - "text_display"
-      - "interaction"
   hanging:
     name: "target-group.entity.hanging"
     priority: 3

@@ -17,11 +17,17 @@ import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Fireball;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Monster;
+import org.bukkit.entity.Snowball;
+import org.bukkit.entity.ThrownExpBottle;
+import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Trident;
 import org.bukkit.entity.Wither;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.Cancellable;
@@ -34,13 +40,17 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityMountEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.PlayerLeashEntityEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerEggThrowEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -54,6 +64,7 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -321,11 +332,8 @@ public class ProtectionEventListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockInteract(PlayerInteractEvent event) {
+    public void onPlayerInteract(PlayerInteractEvent event) {
         Action action = event.getAction();
-        if (action != Action.PHYSICAL && event.getHand() != EquipmentSlot.HAND) {
-            return;
-        }
         SimplePlayer player = SimplePlayer.of(event.getPlayer());
         Block clickedBlock = event.getClickedBlock();
         ItemStack item = event.getItem();
@@ -351,6 +359,7 @@ public class ProtectionEventListener implements Listener {
         if (event.isCancelled()) {
             return;
         }
+
         EntityType spawnType = item == null ? null : spawnEntityType(item.getType());
         if (spawnType == null) {
             return;
@@ -838,11 +847,88 @@ public class ProtectionEventListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityToggleGlide(EntityToggleGlideEvent event) {
+        if (!event.isGliding() || !(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        handlePlayerEvent(event, SimplePlayer.of(player), SimpleLocation.of(player.getLocation()), "fly", null);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityShootBow(EntityShootBowEvent event) {
+        if (!(event.getEntity() instanceof Player player) || event.getBow() == null) {
+            return;
+        }
+        handlePlayerEvent(event, SimplePlayer.of(player), SimpleLocation.of(player.getLocation()), "use", target(event.getBow().getType()));
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        handlePlayerEvent(event,
+                SimplePlayer.of(event.getPlayer()),
+                location(event.getItemDrop()),
+                "dropitem.throw",
+                target(event.getItemDrop().getItemStack().getType())
+        );
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityPickupItem(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+        handlePlayerEvent(event,
+                SimplePlayer.of(player),
+                location(event.getItem()),
+                "dropitem.pickup",
+                target(event.getItem().getItemStack().getType())
+        );
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onProjectileLaunch(ProjectileLaunchEvent event) {
+        if (!(event.getEntity().getShooter() instanceof Player player)) {
+            return;
+        }
+        Material material = projectileUseMaterial(event.getEntity());
+        if (material == null) {
+            return;
+        }
+        handlePlayerEvent(event, SimplePlayer.of(player), SimpleLocation.of(player.getLocation()), "use", target(material));
+    }
+
+    private @Nullable Material projectileUseMaterial(Projectile projectile) {
+        if (projectile instanceof EnderPearl) {
+            return Material.ENDER_PEARL;
+        }
+        if (projectile instanceof ThrownPotion) {
+            return Material.POTION;
+        }
+        if (projectile instanceof Trident) {
+            return Material.TRIDENT;
+        }
+        if (projectile instanceof Snowball) {
+            return Material.SNOWBALL;
+        }
+        if (projectile instanceof org.bukkit.entity.Egg) {
+            return Material.EGG;
+        }
+        if (projectile instanceof ThrownExpBottle) {
+            return Material.EXPERIENCE_BOTTLE;
+        }
+        if (projectile instanceof FishHook) {
+            return Material.FISHING_ROD;
+        }
+        return null;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         if (event.getTo() == null || isSameBlock(event.getFrom(), event.getTo())) {
             return;
         }
         handleEnter(event, event.getPlayer(), event.getFrom(), event.getTo());
+        handleGliding(event, event.getPlayer(), event.getTo());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -851,6 +937,7 @@ public class ProtectionEventListener implements Listener {
             return;
         }
         handleEnter(event, event.getPlayer(), event.getFrom(), event.getTo());
+        handleGliding(event, event.getPlayer(), event.getTo());
     }
 
     private void handleEnter(Cancellable event, Player player, Location from, Location to) {
@@ -862,6 +949,16 @@ public class ProtectionEventListener implements Listener {
             return;
         }
         if (!checkPlayerPermission(SimplePlayer.of(player), SimpleLocation.of(to), "enter", null)) {
+            event.setCancelled(true);
+        }
+    }
+
+    private void handleGliding(Cancellable event, Player player, Location to) {
+        if (!player.isGliding()) {
+            return;
+        }
+        if (!checkPlayerPermission(SimplePlayer.of(player), SimpleLocation.of(to), "fly", null)) {
+            player.setGliding(false);
             event.setCancelled(true);
         }
     }

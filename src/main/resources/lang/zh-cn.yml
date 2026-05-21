@@ -197,6 +197,9 @@ claim:
       damage: "伤害 %material%"
       interact: "交互 %material%"
       spawn: "生成 %material%"
+    dropitem:
+      throw: "丢弃 %material%"
+      pickup: "拾取 %material%"
     use: "使用 %material%"
     teleport: "传送到领地"
     enter: "进入领地"
