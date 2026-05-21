@@ -1,4 +1,4 @@
-package cn.jason31416.betterresidence.migration;
+package cn.jason31416.betterresidence.handler.migration;
 
 import cn.jason31416.betterresidence.core.AreaBox;
 import cn.jason31416.betterresidence.core.Claim;
@@ -20,7 +20,6 @@ import org.bukkit.util.Vector;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;

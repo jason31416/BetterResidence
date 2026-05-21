@@ -1,8 +1,8 @@
-package cn.jason31416.betterresidence.selection;
+package cn.jason31416.betterresidence.handler.selection;
 
 import cn.jason31416.betterresidence.core.AreaBox;
-import cn.jason31416.betterresidence.visual.AreaBoxVisualizer;
-import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
+import cn.jason31416.betterresidence.handler.visual.AreaBoxVisualizer;
+import cn.jason31416.betterresidence.handler.visual.AreaBoxVisualizerManager;
 import cn.jason31416.planetlib.wrapper.SimpleLocation;
 import org.bukkit.Color;
 import org.bukkit.World;

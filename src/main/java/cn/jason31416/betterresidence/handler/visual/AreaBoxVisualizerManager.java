@@ -1,4 +1,4 @@
-package cn.jason31416.betterresidence.visual;
+package cn.jason31416.betterresidence.handler.visual;
 
 import cn.jason31416.betterresidence.core.AreaBox;
 import org.bukkit.Color;

@@ -19,7 +19,7 @@ import cn.jason31416.betterresidence.handler.CommandSuggestionListener;
 import cn.jason31416.betterresidence.handler.DataHandler;
 import cn.jason31416.betterresidence.handler.GeneralEventListener;
 import cn.jason31416.betterresidence.handler.ProtectionEventListener;
-import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
+import cn.jason31416.betterresidence.handler.visual.AreaBoxVisualizerManager;
 import cn.jason31416.planetlib.util.Lang;
 import cn.jason31416.planetlib.util.Util;
 import lombok.Getter;

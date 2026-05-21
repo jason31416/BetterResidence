@@ -1,4 +1,4 @@
-package cn.jason31416.betterresidence.selection;
+package cn.jason31416.betterresidence.handler.selection;
 
 import cn.jason31416.betterresidence.core.AreaBox;
 import cn.jason31416.betterresidence.core.Claim;

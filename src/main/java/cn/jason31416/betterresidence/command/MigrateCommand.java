@@ -1,6 +1,6 @@
 package cn.jason31416.betterresidence.command;
 
-import cn.jason31416.betterresidence.migration.ResidenceMigration;
+import cn.jason31416.betterresidence.handler.migration.ResidenceMigration;
 import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;

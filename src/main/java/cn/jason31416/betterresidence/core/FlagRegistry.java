@@ -97,6 +97,7 @@ public final class FlagRegistry {
     static {
         registerFlag("enter-message", FlagValueType.string(), "");
         registerFlag("leave-message", FlagValueType.string(), "");
+        registerFlag("teleport-location", FlagValueType.string(), "");
 
         FlagValueType flowMode = FlagValueType.options("allow", "internal", "deny");
         registerFlag("flow", flowMode, "internal");

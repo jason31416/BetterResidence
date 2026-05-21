@@ -18,6 +18,8 @@ public class BetterResidenceCommand extends RootCommand {
         new FlagListCommand(this);
         new InfoCommand(this);
         new ListCommand(this);
+        new TpCommand(this);
+        new SetTpCommand(this);
         new CreateCommand(this);
         new RemoveCommand(this);
         new AreaCommand(this);

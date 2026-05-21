@@ -3,7 +3,7 @@ package cn.jason31416.betterresidence.command;
 import cn.jason31416.betterresidence.core.AreaBox;
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
-import cn.jason31416.betterresidence.selection.SelectionManager;
+import cn.jason31416.betterresidence.handler.selection.SelectionManager;
 import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;

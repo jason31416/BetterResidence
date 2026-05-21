@@ -60,6 +60,10 @@ claim:
       permission: "use"
       weight: 0
 
+  teleport:
+    # Seconds players must stand still before /res tp teleports them. Use 0 to disable warmup.
+    warmup-seconds: 3
+
 # Visualizer settings control particle-based area previews.
 visualizer:
   # [Performance] Maximum distance from a player where visualizer particles are rendered.

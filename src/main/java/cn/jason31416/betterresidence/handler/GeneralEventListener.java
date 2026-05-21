@@ -4,10 +4,11 @@ import cn.jason31416.betterresidence.BetterResidence;
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.core.FlagRegistry;
-import cn.jason31416.betterresidence.selection.ClaimCreationValidator;
-import cn.jason31416.betterresidence.selection.SelectionManager;
-import cn.jason31416.betterresidence.visual.AreaBoxVisualizerManager;
-import cn.jason31416.betterresidence.visual.ClaimVisualDisplayManager;
+import cn.jason31416.betterresidence.command.TpCommand;
+import cn.jason31416.betterresidence.handler.selection.ClaimCreationValidator;
+import cn.jason31416.betterresidence.handler.selection.SelectionManager;
+import cn.jason31416.betterresidence.handler.visual.AreaBoxVisualizerManager;
+import cn.jason31416.betterresidence.handler.visual.ClaimVisualDisplayManager;
 import cn.jason31416.planetlib.PlanetLib;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.message.StringMessage;
@@ -47,6 +48,7 @@ public class GeneralEventListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        TpCommand.cancelWarmup(event.getPlayer());
         SelectionManager.clearSelection(event.getPlayer());
         ClaimVisualDisplayManager.clear(event.getPlayer());
         AreaBoxVisualizerManager.remove(event.getPlayer());
@@ -77,6 +79,7 @@ public class GeneralEventListener implements Listener {
             return;
         }
 
+        TpCommand.cancelWarmupIfMoved(event.getPlayer(), event.getFrom(), to);
         handleClaimChange(event.getPlayer(), event.getFrom(), to);
     }
 
@@ -87,6 +90,7 @@ public class GeneralEventListener implements Listener {
             return;
         }
 
+        TpCommand.cancelWarmupIfMoved(event.getPlayer(), event.getFrom(), to);
         handleClaimChange(event.getPlayer(), event.getFrom(), to);
     }
 
