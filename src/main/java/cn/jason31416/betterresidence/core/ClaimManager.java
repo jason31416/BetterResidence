@@ -104,6 +104,7 @@ public class ClaimManager {
                 .keyEquals("uuid", claimUuid)
                 .executeUpdate();
         invalidateClaim(claimUuid);
+        ClaimAreaLookup.clearCache();
     }
 
     public static void setClaimOwner(String claimUuid, SimplePlayer newOwner) {
@@ -112,6 +113,7 @@ public class ClaimManager {
                 .keyEquals("uuid", claimUuid)
                 .executeUpdate();
         invalidateClaim(claimUuid);
+        ClaimAreaLookup.clearCache();
     }
 
     @Nullable
