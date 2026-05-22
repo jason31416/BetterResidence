@@ -5,6 +5,7 @@ import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.message.Message;
 
 public class BetterResidenceCommand extends RootCommand {
+    private final HelpCommand helpCommand;
 
     public BetterResidenceCommand() {
         super("betterresidence");
@@ -27,12 +28,15 @@ public class BetterResidenceCommand extends RootCommand {
         new AreaCommand(this);
         new ResizeCommand(this, "expand", true);
         new ResizeCommand(this, "contract", false);
+
+        // Put this at the end so all above is registered into the help.
+        helpCommand = new HelpCommand(this);
     }
 
     @Override
     public Message execute(ICommandContext context) {
-        return null;
+        return helpCommand.execute(context);
     }
 
-    // We don't need to manually handle tab complete for rootcommand.
+    // No need to manually handle tab complete for rootcommand.
 }

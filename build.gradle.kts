@@ -19,7 +19,7 @@ dependencies {
     compileOnly("com.github.Zrips:Residence:6.0.0.1") {
         isTransitive = false
     }
-    implementation("cn.jason31416:PlanetLib:1.4.1")
+    implementation("com.github.jason31416:planetlib:1.4.2")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
     implementation("org.xerial:sqlite-jdbc:3.46.0.0")
@@ -36,7 +36,7 @@ tasks.withType<JavaCompile> {
 tasks.runServer {
     minecraftVersion("1.21.8")
     doFirst {
-//        delete(layout.projectDirectory.dir("run/plugins/BetterResidence"))
+        delete(layout.projectDirectory.dir("run/plugins/BetterResidence/lang"))
     }
 }
 

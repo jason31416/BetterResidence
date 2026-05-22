@@ -130,7 +130,7 @@ final class ClaimCommandFormat {
     }
 
     static String raw(String key) {
-        return Lang.messageLoader.getRawMessage(key, EMPTY_FALLBACK);
+        return Lang.messageLoader.getRawMessage(key, key);
     }
 
     static Message rawMessage(String key) {

@@ -48,6 +48,72 @@ command:
   reload-success: "<highlight>BetterResidence <content>已重新加载"
   reload-failed: "<error-primary>错误: <error-content>BetterResidence 重新加载失败: <error-highlight>%error%"
 
+  help-message:
+    - "<dark_gray>======== <highlight>BetterResidence <muted>- 命令帮助 <dark_gray>========"
+  help-entry: "<muted>- <highlight>%usage% <dark_gray>- <content>%description%"
+  help-footer:
+    - "<content>第 <highlight>%page%<content>/<highlight>%page-count% <content>页"
+    - "%prev% <muted>| %next%"
+  help:
+    commands:
+      create:
+        usage: "/res create <领地名>"
+        description: "用当前选区创建领地或子领地"
+      remove:
+        usage: "/res remove"
+        description: "删除当前位置的领地，需要二次确认"
+      rename:
+        usage: "/res rename <新领地名>"
+        description: "重命名当前位置的领地"
+      setowner:
+        usage: "/res setowner <玩家>"
+        description: "转让当前位置的领地所有者"
+      trust:
+        usage: "/res trust <玩家> [权限组]"
+        description: "把玩家加入当前领地的权限组；默认为成员权限组"
+      untrust:
+        usage: "/res untrust <玩家>"
+        description: "移除玩家在当前领地的权限组（等同于设置为访客）"
+      set:
+        usage: "/res set <权限> <权限组>"
+        description: "设置当前领地某权限节点需要的最低权限组"
+      flag:
+        usage: "/res flag <标志> [值]"
+        description: "查看或设置当前领地的设置"
+      flaglist:
+        usage: "/res flaglist"
+        description: "列出当前领地已保存的设置"
+      info:
+        usage: "/res info [领地]"
+        description: "查看当前位置或指定领地的信息"
+      list:
+        usage: "/res list [玩家] [页码]"
+        description: "分页列出自己或指定玩家的领地"
+      tp:
+        usage: "/res tp <领地>"
+        description: "传送到指定领地的传送点"
+      help:
+        usage: "/res help [页码]"
+        description: "显示本帮助消息"
+      settp:
+        usage: "/res settp"
+        description: "设置当前领地的传送点"
+      area:
+        usage: "/res area <add|remove|list>"
+        description: "追加、删除或查看当前领地区域"
+      expand:
+        usage: "/res expand <方块数>"
+        description: "按视角方向扩展当前位置的区域"
+      contract:
+        usage: "/res contract <方块数>"
+        description: "按视角方向收缩当前位置的区域"
+      admin:
+        usage: "/res admin <子命令>"
+        description: "执行数据检查、迁移和管理模式命令"
+      reload:
+        usage: "/res reload"
+        description: "重新加载配置、语言和规则"
+
   admin-help: "<content>BetterResidence 管理命令: <highlight>/res admin fsck<content>, <highlight>/res admin toggleadminmode"
   admin-mode-enabled: "<content>管理模式已<highlight>开启<content>，你现在拥有所有领地权限"
   admin-mode-disabled: "<content>管理模式已<highlight>关闭<content>，你现在按领地权限规则行动"
@@ -154,7 +220,7 @@ command:
     - "<content>共 <highlight>%count% <content>个领地"
   list-entry: "<muted>- <hover:show_text:'%hover%'><click:run_command:/res info %uuid%><highlight>%claim%</click></hover>"
   list-footer:
-    - "第 <highlight>%page%<content>/<highlight>%page-count% <content>页"
+    - "<content>第 <highlight>%page%<content>/<highlight>%page-count% <content>页"
     - "%prev% <muted>| %next%"
 
   format:
