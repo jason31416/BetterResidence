@@ -464,11 +464,22 @@ public class Claim {
      */
     private boolean checkWeightPermission(int weight, String permission, @Nullable String target){
         if(weight==1000) return true; // Owner always have all permissions.
+        return findPermissionNode(permission, target)
+                .map(node -> weight >= node.getWeight())
+                .orElse(false);
+    }
+
+    /**
+     * Find the permission rule that would decide a permission check.
+     * @param permission The action without a target suffix.
+     * @param target Nullable. The target of the action, such as block material, item material, or entity type.
+     */
+    public Optional<PermissionNode> findPermissionNode(String permission, @Nullable String target) {
         if(permissionNodes==null) fetchPermissionNodes();
         PermissionTargetType targetType = PermissionRegistry.getPermission(permission)
                 .map(PermissionRegistry.RegisteredPermission::targetType)
                 .orElse(PermissionTargetType.NONE);
-        Optional<PermissionNode> result = permissionNodes.stream()
+        return permissionNodes.stream()
                 .filter(node->node.getPermissionPriority(permission)>=0)
                 .filter(node->node.getTargetPriority(targetType, target)>=0)
                 // Permission-name specificity is compared before material specificity.
@@ -476,7 +487,6 @@ public class Claim {
                 .max(Comparator
                         .comparingInt((PermissionNode node) -> node.getPermissionPriority(permission))
                         .thenComparingInt(node -> node.getTargetPriority(targetType, target)));
-        return result.map(node -> weight >= node.getWeight()).orElse(false);
     }
 
     /**

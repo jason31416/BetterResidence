@@ -15,6 +15,7 @@ public class BetterResidenceCommand extends RootCommand {
         new TrustCommand(this);
         new UntrustCommand(this);
         new SetCommand(this);
+        new CheckCommand(this);
         new FlagCommand(this);
         new FlagListCommand(this);
         new InfoCommand(this);

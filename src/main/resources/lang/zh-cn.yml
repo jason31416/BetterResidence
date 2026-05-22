@@ -34,6 +34,12 @@ command:
   trust-success: "<content>已将 <highlight>%player% <content>加入领地 <highlight>%claim% <content>的 <highlight>%group% <content>权限组"
   untrust-success: "<content>已将 <highlight>%player% <content>从领地 <highlight>%claim% <content>的权限组中移除"
   set-permission-success: "<content>已将领地 <highlight>%claim% <content>中权限 <highlight>%permission% <content>的最低权限组设置为 <highlight>%group%"
+  check-usage: "<error-primary>错误: <error/-content>正确用法: <error-highlight>/res check <权限>"
+  check-message:
+    - "<highlight>%claim%: %status%"
+    - "<muted>最低需要权限组: <highlight>%required-group%"
+  check-allowed: "<content>你的权限组 <highlight>%group% <content>拥有权限 <highlight>%permission%"
+  check-denied: "<content>你的权限组 <highlight>%group% <content>没有权限 <highlight>%permission%"
   flag-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res flag <标志> [值]"
   flag-not-found: "<error-primary>错误: <error-content>未知领地标志 <error-highlight>%flag%"
   flag-invalid-value: "<error-primary>错误: <error-content>领地标志 <error-highlight>%flag% <error-content>不接受值 <error-highlight>%value%"
@@ -77,6 +83,9 @@ command:
       set:
         usage: "/res set <权限> <权限组>"
         description: "设置当前领地某权限节点需要的最低权限组"
+      check:
+        usage: "/res check <权限>"
+        description: "检查你在当前领地是否拥有某权限，并显示最低权限组要求"
       flag:
         usage: "/res flag <标志> [值]"
         description: "查看或设置当前领地的设置"
@@ -279,6 +288,7 @@ claim:
     use: "使用 %material%"
     teleport: "传送到领地"
     enter: "进入领地"
+    fly: "飞行"
 
   group:
     none: "访客"
@@ -292,11 +302,11 @@ target-group:
   block:
     all: "所有方块"
     container: "容器"
-    doors: "门类"
+    doors: "门"
     signs: "告示牌"
     redstone: "红石组件"
-    workstations: "工作站"
-    crops: "作物"
+    workstations: "工作方块"
+    crops: "农作物"
     beds: "床"
     rails: "铁轨"
   material:
@@ -312,14 +322,12 @@ target-group:
   entity:
     all: "所有实体"
     hostile_mobs: "敌对生物"
-    bosses: "Boss"
     neutral_mobs: "中立生物"
     passive_mobs: "被动生物"
     villagers: "村民"
     vehicles: "载具"
     projectiles: "弹射物"
-    displays: "展示实体"
-    hanging: "悬挂实体"
+    hanging: "方块实体"
 
 console:
   loading: "[BetterResidence] 正在初始化 BetterResidence..."
