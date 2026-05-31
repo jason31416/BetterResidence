@@ -28,6 +28,8 @@ public final class BetterResidence extends JavaPlugin {
     @Getter
     private static BetterResidence instance;
 
+    private boolean launched=false;
+
     @Override
     public void onEnable() {
         instance = this;
@@ -44,13 +46,13 @@ public final class BetterResidence extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new ProtectionEventListener(), this);
 
             PluginLogger.send(Lang.getMessage("console.loaded"));
+            launched = true;
         } catch (Exception e) {
             PluginLogger.error("Found illegal config: " + e.getMessage());
             getServer().getPluginManager().disablePlugin(this);
         }
 
-        // This is for testing purposes.
-        createTestClaim();
+//        createTestClaim();
     }
 
     // For testing, do not delete during development stages.
@@ -90,6 +92,7 @@ public final class BetterResidence extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if(!launched) return;
         AreaBoxVisualizerManager.shutdown();
         DataHandler.close();
         PluginLogger.send(Lang.getMessage("console.disabled"));

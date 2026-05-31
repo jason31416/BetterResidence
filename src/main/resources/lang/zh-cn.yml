@@ -19,7 +19,6 @@ command:
   claim-not-found: "<error-primary>错误: <error-content>找不到领地 <error-highlight>%claim%"
   info-player-only: "<error-primary>错误: <error-content>控制台需要指定要查询的领地"
   list-player-only: "<error-primary>错误: <error-content>控制台需要指定玩家，例如 <error-highlight>/res list <玩家>"
-  no-claims: "<content>没有找到 <highlight>%player% <content>拥有的领地"
   tp-usage: "<error-primary>错误: <error-content>正确用法: <error-highlight>/res tp <领地>"
   tp-location-not-set: "<error-primary>错误: <error-content>该领地尚未设置传送点，请领地管理员使用 <error-highlight>/res settp"
   tp-location-invalid: "<error-primary>错误: <error-content>该领地的传送点无效，请领地管理员重新使用 <error-highlight>/res settp"
@@ -96,8 +95,8 @@ command:
         usage: "/res info [领地]"
         description: "查看当前位置或指定领地的信息"
       list:
-        usage: "/res list [玩家] [页码]"
-        description: "分页列出自己或指定玩家的领地"
+        usage: "/res list [筛选器...] [页码|page:<页码>]"
+        description: "分页列出领地，可用 user、radius、world、name、parent 筛选"
       tp:
         usage: "/res tp <领地>"
         description: "传送到指定领地的传送点"
@@ -225,9 +224,16 @@ command:
     - "<muted>权限组: <hover:show_text:'%groups%'><highlight>%group-count% <muted>个</hover> <muted>| 成员: <hover:show_text:'%members%'><highlight>%member-count%</hover>"
     - "<hover:show_text:'输入信任玩家命令'><click:suggest_command:/res trust ><content>[添加玩家]</click></hover> <hover:show_text:'输入权限设置命令'><click:suggest_command:/res set ><content>[设置权限]</click></hover>"
   list-message:
-    - "<dark_gray>======== <highlight>%player% <muted>的领地 <dark_gray>========"
+    - "<dark_gray>======== <highlight>领地列表 <dark_gray>========"
+    - "<muted>筛选: <highlight>%filters%"
     - "<content>共 <highlight>%count% <content>个领地"
-  list-entry: "<muted>- <hover:show_text:'%hover%'><click:run_command:/res info %uuid%><highlight>%claim%</click></hover>"
+  list-empty: "<muted>没有找到符合条件的领地"
+  list-invalid-filter: "<error-primary>错误: <error-content>未知列表筛选器 <error-highlight>%filter%"
+  list-invalid-page: "<error-primary>错误: <error-content>页码必须是正整数"
+  list-invalid-radius: "<error-primary>错误: <error-content>radius 必须是正整数"
+  list-radius-player-only: "<error-primary>错误: <error-content>radius 筛选器只能由玩家使用"
+  list-invalid-world: "<error-primary>错误: <error-content>找不到世界 <error-highlight>%world%"
+  list-entry: "<muted>- <hover:show_text:'%hover%'><click:run_command:/res info %uuid%><highlight>%claim%</click></hover> <dark_gray>(<content>%owner%<dark_gray>)"
   list-footer:
     - "<content>第 <highlight>%page%<content>/<highlight>%page-count% <content>页"
     - "%prev% <muted>| %next%"
@@ -252,6 +258,7 @@ command:
     parent-link: "<hover:show_text:'点击查看父领地'><click:run_command:/res info %uuid%>%claim%</click></hover>"
     parent-path-entry: "<hover:show_text:'点击查看领地'><click:run_command:/res info %uuid%>%claim%</click></hover>"
     list-entry-hover: "点击查看详情"
+    all: "全部"
 
 claim:
   prohibited-action: "<error-highlight>%group-name% <error-content>没有权限 %permission%"

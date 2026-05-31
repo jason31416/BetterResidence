@@ -91,6 +91,108 @@ public class ClaimManager {
                 .toList();
     }
 
+    public static ClaimListPage fetchClaimsPage(ClaimListQuery query) {
+        QueryParts queryParts = buildClaimListQuery(query, false);
+        int totalCount = DataHandler.getDatabase().getSqlInstance().executeQueryOne(
+                queryParts.sql(),
+                queryParts.params(),
+                rs -> rs.getInt("claim_count")
+        ).orElse(0);
+
+        if (totalCount == 0) {
+            return new ClaimListPage(List.of(), 0, 1);
+        }
+
+        int page = Math.min(Math.max(query.page(), 1), Math.max(1, (int) Math.ceil((double) totalCount / query.pageSize())));
+        int offset = (page - 1) * query.pageSize();
+
+        queryParts = buildClaimListQuery(query.withPage(page), true);
+        List<Param> params = new ArrayList<>(queryParts.params());
+        params.add(Param.of(query.pageSize()));
+        params.add(Param.of(offset));
+
+        List<Claim> claims = DataHandler.getDatabase().getSqlInstance().executeQuery(
+                queryParts.sql(),
+                params,
+                rs -> fetchClaim(rs.getString("uuid"))
+        ).stream()
+                .filter(claim -> claim != null)
+                .toList();
+
+        return new ClaimListPage(claims, totalCount, page);
+    }
+
+    private static QueryParts buildClaimListQuery(ClaimListQuery query, boolean pageQuery) {
+        List<Param> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder();
+        boolean areaJoinRequired = query.worldUuid() != null || query.areaSearch() != null;
+        if (pageQuery) {
+            sql.append(areaJoinRequired ? "SELECT DISTINCT claim.uuid, claim.name FROM claim" : "SELECT claim.uuid, claim.name FROM claim");
+        } else {
+            sql.append(areaJoinRequired ? "SELECT COUNT(DISTINCT claim.uuid) AS claim_count FROM claim" : "SELECT COUNT(*) AS claim_count FROM claim");
+        }
+
+        if (areaJoinRequired) {
+            sql.append(" JOIN claim_areas ON claim_areas.claim_uuid = claim.uuid");
+        }
+        if (query.areaSearch() != null) {
+            sql.append(" JOIN area ON area.id = claim_areas.area_id");
+        }
+
+        List<String> conditions = new ArrayList<>();
+        if (query.ownerUuid() != null) {
+            conditions.add("claim.owner_uuid = ?");
+            params.add(Param.of(query.ownerUuid().toString()));
+        }
+        if (query.namePrefix() != null && !query.namePrefix().isBlank()) {
+            conditions.add("claim.name COLLATE NOCASE LIKE ? ESCAPE '\\'");
+            params.add(Param.of(escapeLike(query.namePrefix()) + "%"));
+        }
+        if (query.parentNull()) {
+            conditions.add("claim.parent_uuid IS NULL");
+        } else if (query.parentUuid() != null) {
+            conditions.add("claim.parent_uuid = ?");
+            params.add(Param.of(query.parentUuid()));
+        }
+        if (query.worldUuid() != null) {
+            conditions.add("claim_areas.world = ?");
+            params.add(Param.of(query.worldUuid()));
+        }
+        if (query.areaSearch() != null) {
+            AreaSearch areaSearch = query.areaSearch();
+            AreaBox box = areaSearch.box();
+            conditions.add("claim_areas.world = ?");
+            params.add(Param.of(areaSearch.worldUuid()));
+            conditions.add("area.minX <= ?");
+            params.add(Param.of(box.maxX()));
+            conditions.add("area.maxX >= ?");
+            params.add(Param.of(box.minX()));
+            conditions.add("area.minY <= ?");
+            params.add(Param.of(box.maxY()));
+            conditions.add("area.maxY >= ?");
+            params.add(Param.of(box.minY()));
+            conditions.add("area.minZ <= ?");
+            params.add(Param.of(box.maxZ()));
+            conditions.add("area.maxZ >= ?");
+            params.add(Param.of(box.minZ()));
+        }
+
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+        if (pageQuery) {
+            sql.append(" ORDER BY claim.name COLLATE NOCASE ASC, claim.uuid ASC LIMIT ? OFFSET ?");
+        }
+        return new QueryParts(sql.toString(), params);
+    }
+
+    private static String escapeLike(String value) {
+        return value
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+    }
+
     public static boolean claimNameExists(String name) {
         return DataHandler.getDatabase().select("claim")
                 .keyEquals("name", name)
@@ -460,6 +562,23 @@ public class ClaimManager {
     }
 
     public record ClaimMemberInfo(SimplePlayer player, String groupId) {
+    }
+
+    private record QueryParts(String sql, List<Param> params) {
+    }
+
+    public record AreaSearch(String worldUuid, AreaBox box) {
+    }
+
+    public record ClaimListQuery(@Nullable UUID ownerUuid, @Nullable String worldUuid, @Nullable String namePrefix,
+                                 @Nullable String parentUuid, boolean parentNull, @Nullable AreaSearch areaSearch,
+                                 int page, int pageSize) {
+        public ClaimListQuery withPage(int page) {
+            return new ClaimListQuery(ownerUuid, worldUuid, namePrefix, parentUuid, parentNull, areaSearch, page, pageSize);
+        }
+    }
+
+    public record ClaimListPage(List<Claim> claims, int totalCount, int page) {
     }
 
 }

@@ -61,6 +61,10 @@ public class DataHandler {
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_name ON claim(name);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_owner_uuid ON claim(owner_uuid);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_parent_uuid ON claim(parent_uuid);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_name_nocase ON claim(name COLLATE NOCASE);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_owner_name ON claim(owner_uuid, name COLLATE NOCASE);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_parent_name ON claim(parent_uuid, name COLLATE NOCASE);", List.of());
+        database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_claim_areas_claim_world ON claim_areas(claim_uuid, world);", List.of());
         database.getSqlInstance().execute("CREATE INDEX IF NOT EXISTS idx_player_groups_claim_uuid ON player_groups(claim_uuid);", List.of());
         database.getSqlInstance().execute("PRAGMA optimize;", List.of());
     }
