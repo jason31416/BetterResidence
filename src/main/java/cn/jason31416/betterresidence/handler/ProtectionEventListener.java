@@ -62,6 +62,7 @@ import org.bukkit.event.player.PlayerUnleashEntityEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.event.vehicle.VehicleMoveEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
@@ -923,8 +924,33 @@ public class ProtectionEventListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlayerMoveOnVehicle(VehicleMoveEvent event) {
+        if (isSameBlock(event.getFrom(), event.getTo())) {
+            return;
+        }
+        var passengers = event.getVehicle().getPassengers();
+        for(var i: passengers) {
+            if(i instanceof Player pl) {
+                handleEnter(new Cancellable() {
+                    @Override
+                    public boolean isCancelled() {
+                        return false;
+                    }
+
+                    @Override
+                    public void setCancelled(boolean cancel) {
+                        if(cancel){
+                            event.getVehicle().removePassenger(pl);
+                        }
+                    }
+                }, pl, event.getFrom(), event.getTo());
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (event.getTo() == null || isSameBlock(event.getFrom(), event.getTo())) {
+        if (isSameBlock(event.getFrom(), event.getTo())) {
             return;
         }
         handleEnter(event, event.getPlayer(), event.getFrom(), event.getTo());
@@ -933,9 +959,6 @@ public class ProtectionEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (event.getTo() == null) {
-            return;
-        }
         handleEnter(event, event.getPlayer(), event.getFrom(), event.getTo());
         handleGliding(event, event.getPlayer(), event.getTo());
     }
