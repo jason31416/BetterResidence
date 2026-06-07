@@ -4,6 +4,7 @@ import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.core.PermissionTargetType;
+import cn.jason31416.planetlib.PlanetLib;
 import cn.jason31416.planetlib.command.ChildCommand;
 import cn.jason31416.planetlib.command.ICommandContext;
 import cn.jason31416.planetlib.command.IParentCommand;

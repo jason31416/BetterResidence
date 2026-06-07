@@ -6,6 +6,7 @@ import cn.jason31416.betterresidence.core.DefaultClaimGroupRegistry;
 import cn.jason31416.betterresidence.core.TargetGroup;
 import cn.jason31416.betterresidence.core.AreaBox;
 import cn.jason31416.betterresidence.core.Claim;
+import cn.jason31416.betterresidence.core.TestClaimGenerator;
 import cn.jason31416.planetlib.Required;
 import cn.jason31416.planetlib.message.MessageTheme;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
@@ -57,24 +58,7 @@ public final class BetterResidence extends JavaPlugin {
 
     // For testing, do not delete during development stages.
     private void createTestClaim() {
-        String name = "test-claim";
-        boolean exists = DataHandler.getDatabase().select("claim")
-                .keyEquals("name", name)
-                .one()
-                .isPresent();
-        if (exists) {
-            return;
-        }
-
-        AreaBox ab = new AreaBox(-5, 50, 0, 300, -1000, 1000);
-
-        Claim claim = ClaimManager.createClaim(
-                SimplePlayer.of("HelloThere"),
-                name,
-                null,
-                SimpleWorld.defaultWorld(),
-                ab
-        );
+        new TestClaimGenerator().generate();
     }
 
     public void reloadPluginConfig() {

@@ -148,7 +148,8 @@ public class TpCommand extends ChildCommand {
 
         String storedLocation = claim.getStringFlag(TELEPORT_LOCATION_FLAG, "");
         if (storedLocation.isBlank()) {
-            return TeleportDestination.error(Lang.getMessage("command.tp-location-not-set"));
+            // Fall back to center of claim if teleport location is not set
+            return getCenterOfClaim(player, claim);
         }
 
         Location location = parseTeleportLocation(player.getPlayer(), storedLocation);
@@ -160,6 +161,50 @@ public class TpCommand extends ChildCommand {
         }
 
         return TeleportDestination.success(location);
+    }
+
+    private TeleportDestination getCenterOfClaim(SimplePlayer player, Claim claim) {
+        List<ClaimManager.ClaimAreaInfo> areas = ClaimManager.fetchClaimAreas(claim.getUuid());
+        if (areas.isEmpty()) {
+            return TeleportDestination.error(Lang.getMessage("command.tp-location-not-set"));
+        }
+
+        // Find the overall bounds of all areas
+        int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
+        int minZ = Integer.MAX_VALUE, maxZ = Integer.MIN_VALUE;
+        String worldUuid = null;
+
+        for (ClaimManager.ClaimAreaInfo area : areas) {
+            if (worldUuid == null) {
+                worldUuid = area.worldUuid();
+            } else if (!worldUuid.equals(area.worldUuid())) {
+                // Skip areas in different worlds - we'll use the first world found
+                continue;
+            }
+            minX = Math.min(minX, area.box().minX());
+            maxX = Math.max(maxX, area.box().maxX());
+            minZ = Math.min(minZ, area.box().minZ());
+            maxZ = Math.max(maxZ, area.box().maxZ());
+        }
+
+        if (worldUuid == null) {
+            return TeleportDestination.error(Lang.getMessage("command.tp-location-not-set"));
+        }
+
+        // Calculate center coordinates
+        int centerX = (minX + maxX) / 2;
+        int centerZ = (minZ + maxZ) / 2;
+
+        // Get the world and find highest block
+        World world = player.getPlayer().getServer().getWorld(UUID.fromString(worldUuid));
+        if (world == null) {
+            return TeleportDestination.error(Lang.getMessage("command.tp-location-not-set"));
+        }
+
+        int highestY = world.getHighestBlockYAt(centerX, centerZ);
+        Location centerLocation = new Location(world, centerX + 0.5, highestY + 1, centerZ + 0.5);
+
+        return TeleportDestination.success(centerLocation);
     }
 
     private void completeTeleport(Player player, PendingTeleport pendingTeleport) {
@@ -183,7 +228,7 @@ public class TpCommand extends ChildCommand {
             return;
         }
 
-            TeleportDestination destination = resolveDestination(SimplePlayer.of(player), claim);
+        TeleportDestination destination = resolveDestination(SimplePlayer.of(player), claim);
         if (destination.error() != null) {
             destination.error().send(player);
             return;

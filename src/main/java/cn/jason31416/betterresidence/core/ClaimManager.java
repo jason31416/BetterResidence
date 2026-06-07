@@ -111,11 +111,13 @@ public class ClaimManager {
         params.add(Param.of(query.pageSize()));
         params.add(Param.of(offset));
 
-        List<Claim> claims = DataHandler.getDatabase().getSqlInstance().executeQuery(
+        List<String> uuids = DataHandler.getDatabase().getSqlInstance().executeQuery(
                 queryParts.sql(),
                 params,
-                rs -> fetchClaim(rs.getString("uuid"))
-        ).stream()
+                rs -> rs.getString("uuid")
+        );
+        List<Claim> claims = uuids.stream()
+                .map(ClaimManager::fetchClaim)
                 .filter(claim -> claim != null)
                 .toList();
 
