@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.core;
 
 import cn.jason31416.betterresidence.handler.DataHandler;
+import cn.jason31416.planetlib.data.statement.SQLStatement;
 import cn.jason31416.planetlib.util.Config;
 import cn.jason31416.planetlib.util.MapTree;
 import cn.jason31416.planetlib.wrapper.SimplePlayer;
@@ -39,9 +40,14 @@ public class Claim {
 
     private final Map<SimplePlayer, Pair<String, Integer>> playerGroupCache = new ConcurrentHashMap<>();
 
+    private final Object permissionLock = new Object();
+    private final Object flagsLock = new Object();
+    private final Object subclaimsLock = new Object();
+
     protected List<PermissionNode> permissionNodes = null;
     private Map<String, String> claimFlags = null;
     protected List<String> subClaims = null;
+    private List<ClaimGroup> cachedClaimGroups = null;
 
     public Claim(SimplePlayer owner, String name, String uuid, @Nullable String parentUuid) {
         this.owner = owner;
@@ -135,18 +141,24 @@ public class Claim {
     // --------- Subclaim ---------------
 
     private void fetchSubclaims(){
-        subClaims = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         List<MapTree> rows = DataHandler.getDatabase().select("claim")
                 .keyEquals("parent_uuid", uuid)
                 .list();
         for (MapTree row : rows) {
-            subClaims.add(row.getString("uuid"));
+            result.add(row.getString("uuid"));
         }
+        subClaims = result;
     }
 
     public List<String> getSubClaims() {
-        if (subClaims == null) fetchSubclaims();
-        return subClaims;
+        List<String> cached = subClaims;
+        if (cached != null) return cached;
+        synchronized (subclaimsLock) {
+            if (subClaims != null) return subClaims;
+            fetchSubclaims();
+            return subClaims;
+        }
     }
 
     /**
@@ -159,33 +171,28 @@ public class Claim {
                 .toList();
         List<String> promotedSubclaims = new ArrayList<>(getSubClaims());
 
-        DataHandler.getDatabase().update("claim")
+        List<SQLStatement> statements = new ArrayList<>();
+        statements.add(DataHandler.getDatabase().update("claim")
                 .value("parent_uuid", parentUuid)
-                .keyEquals("parent_uuid", uuid)
-                .executeUpdate();
-        DataHandler.getDatabase().delete("claim_permissions")
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
-        DataHandler.getDatabase().delete("group_weights")
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
-        DataHandler.getDatabase().delete("player_groups")
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
-        DataHandler.getDatabase().delete("claim_flags")
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
-        DataHandler.getDatabase().delete("claim_areas")
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
+                .keyEquals("parent_uuid", uuid));
+        statements.add(DataHandler.getDatabase().delete("claim_permissions")
+                .keyEquals("claim_uuid", uuid));
+        statements.add(DataHandler.getDatabase().delete("group_weights")
+                .keyEquals("claim_uuid", uuid));
+        statements.add(DataHandler.getDatabase().delete("player_groups")
+                .keyEquals("claim_uuid", uuid));
+        statements.add(DataHandler.getDatabase().delete("claim_flags")
+                .keyEquals("claim_uuid", uuid));
+        statements.add(DataHandler.getDatabase().delete("claim_areas")
+                .keyEquals("claim_uuid", uuid));
         for (int areaId : areaIds) {
-            DataHandler.getDatabase().delete("area")
-                    .keyEquals("id", areaId)
-                    .executeUpdate();
+            statements.add(DataHandler.getDatabase().delete("area")
+                    .keyEquals("id", areaId));
         }
-        DataHandler.getDatabase().delete("claim")
-                .keyEquals("uuid", uuid)
-                .executeUpdate();
+        statements.add(DataHandler.getDatabase().delete("claim")
+                .keyEquals("uuid", uuid));
+
+        DataHandler.getDatabase().executeBatch(statements);
 
         ClaimManager.invalidateClaim(uuid);
         ClaimManager.invalidateClaims(promotedSubclaims);
@@ -198,6 +205,7 @@ public class Claim {
         permissionNodes = null;
         claimFlags = null;
         subClaims = null;
+        cachedClaimGroups = null;
     }
 
     // --------- Flag system ------------
@@ -206,24 +214,34 @@ public class Claim {
      * Load all claim settings into memory
      */
     private void fetchClaimFlags() {
-        claimFlags = new HashMap<>();
+        Map<String, String> result = new HashMap<>();
         List<MapTree> rows = DataHandler.getDatabase().select("claim_flags")
                 .keyEquals("claim_uuid", uuid)
                 .list();
         for (MapTree row : rows) {
-            claimFlags.put(row.getString("flag"), row.getString("value"));
+            result.put(row.getString("flag"), row.getString("value"));
+        }
+        claimFlags = result;
+    }
+
+    private Map<String, String> getClaimFlags() {
+        Map<String, String> cached = claimFlags;
+        if (cached != null) return cached;
+        synchronized (flagsLock) {
+            if (claimFlags != null) return claimFlags;
+            fetchClaimFlags();
+            return claimFlags;
         }
     }
 
     public String getStringFlag(String flag, String defaultValue) {
-        if(claimFlags == null) fetchClaimFlags();
-        return claimFlags.getOrDefault(flag, defaultValue);
+        return getClaimFlags().getOrDefault(flag, defaultValue);
     }
 
     public String getFlag(FlagRegistry.RegisteredFlag flag) {
-        if(claimFlags == null) fetchClaimFlags();
+        Map<String, String> flags = getClaimFlags();
         for (FlagRegistry.RegisteredFlag currentFlag : FlagRegistry.getFlagAndParents(flag)) {
-            String value = claimFlags.get(currentFlag.id());
+            String value = flags.get(currentFlag.id());
             if (value != null) {
                 return value;
             }
@@ -232,8 +250,7 @@ public class Claim {
     }
 
     public Map<String, String> getStoredFlags() {
-        if (claimFlags == null) fetchClaimFlags();
-        return Map.copyOf(claimFlags);
+        return Map.copyOf(getClaimFlags());
     }
 
     public boolean setFlag(String flag, String value) {
@@ -242,18 +259,21 @@ public class Claim {
             return false;
         }
 
-        DataHandler.getDatabase().delete("claim_flags")
+        List<SQLStatement> statements = new ArrayList<>();
+        statements.add(DataHandler.getDatabase().delete("claim_flags")
                 .keyEquals("claim_uuid", uuid)
-                .keyEquals("flag", flag)
-                .executeUpdate();
+                .keyEquals("flag", flag));
         if (!value.equals(registeredFlag.get().defaultValue())) {
-            DataHandler.getDatabase().insert("claim_flags")
+            statements.add(DataHandler.getDatabase().insert("claim_flags")
                     .value("flag", flag)
                     .value("value", value)
-                    .value("claim_uuid", uuid)
-                    .executeUpdate();
+                    .value("claim_uuid", uuid));
         }
-        claimFlags = null;
+        DataHandler.getDatabase().executeBatch(statements);
+
+        synchronized (flagsLock) {
+            claimFlags = null;
+        }
         return true;
     }
 
@@ -336,18 +356,19 @@ public class Claim {
             }
         }
 
-        DataHandler.getDatabase().delete("player_groups")
+        List<SQLStatement> statements = new ArrayList<>();
+        statements.add(DataHandler.getDatabase().delete("player_groups")
                 .keyEquals("player_uuid", player.getUUID().toString())
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
+                .keyEquals("claim_uuid", uuid));
 
         if (groupName != null) {
-            DataHandler.getDatabase().insert("player_groups")
+            statements.add(DataHandler.getDatabase().insert("player_groups")
                     .value("player_uuid", player.getUUID().toString())
                     .value("group_id", groupId)
-                    .value("claim_uuid", uuid)
-                    .executeUpdate();
+                    .value("claim_uuid", uuid));
         }
+
+        DataHandler.getDatabase().executeBatch(statements);
 
         playerGroupCache.remove(player);
         return true;
@@ -372,6 +393,8 @@ public class Claim {
      * special names.
      */
     public List<ClaimGroup> getClaimGroups() {
+        List<ClaimGroup> cached = cachedClaimGroups;
+        if (cached != null) return cached;
         List<ClaimGroup> claimGroups = new ArrayList<>(DefaultClaimGroupRegistry.getConfiguredGroups());
         DataHandler.getDatabase().select("group_weights")
                 .keyEquals("claim_uuid", uuid)
@@ -381,6 +404,7 @@ public class Claim {
                         row.getString("group_name"),
                         row.getInt("weight")
                 )));
+        cachedClaimGroups = claimGroups;
         return claimGroups;
     }
 
@@ -397,25 +421,27 @@ public class Claim {
     }
 
     public void setPermission(String permission, int weight) {
-        DataHandler.getDatabase().delete("claim_permissions")
+        List<SQLStatement> statements = new ArrayList<>();
+        statements.add(DataHandler.getDatabase().delete("claim_permissions")
                 .keyEquals("permission", permission)
-                .keyEquals("claim_uuid", uuid)
-                .executeUpdate();
-
-        DataHandler.getDatabase().insert("claim_permissions")
+                .keyEquals("claim_uuid", uuid));
+        statements.add(DataHandler.getDatabase().insert("claim_permissions")
                 .value("permission", permission)
                 .value("weight", weight)
-                .value("claim_uuid", uuid)
-                .executeUpdate();
+                .value("claim_uuid", uuid));
 
-        permissionNodes = null;
+        DataHandler.getDatabase().executeBatch(statements);
+
+        synchronized (permissionLock) {
+            permissionNodes = null;
+        }
     }
 
     /**
      * Load all permission nodes into memory
      */
     private void fetchPermissionNodes() {
-        permissionNodes = new ArrayList<>();
+        List<PermissionNode> result = new ArrayList<>();
         Set<String> storedPermissionKeys = new HashSet<>();
         List<MapTree> rows = DataHandler.getDatabase().select("claim_permissions")
                 .keyEquals("claim_uuid", uuid)
@@ -424,22 +450,31 @@ public class Claim {
             String permission = row.getString("permission");
             storedPermissionKeys.add(permission);
             int weight = row.getInt("weight");
-            permissionNodes.add(createPermissionNode(permission, weight));
+            result.add(createPermissionNode(permission, weight));
         }
 
-        if (!Config.contains("claim.default-permissions")) {
-            return;
-        }
+        if (Config.contains("claim.default-permissions")) {
+            MapTree defaultPermissions = Config.getSection("claim.default-permissions");
+            for (String key : defaultPermissions.getKeys()) {
+                String permission = defaultPermissions.getString(key + ".permission");
+                if (storedPermissionKeys.contains(permission)) {
+                    continue;
+                }
 
-        MapTree defaultPermissions = Config.getSection("claim.default-permissions");
-        for (String key : defaultPermissions.getKeys()) {
-            String permission = defaultPermissions.getString(key + ".permission");
-            if (storedPermissionKeys.contains(permission)) {
-                continue;
+                int weight = defaultPermissions.getInt(key + ".weight");
+                result.add(createPermissionNode(permission, weight));
             }
+        }
+        permissionNodes = result;
+    }
 
-            int weight = defaultPermissions.getInt(key + ".weight");
-            permissionNodes.add(createPermissionNode(permission, weight));
+    private List<PermissionNode> getPermissionNodes() {
+        List<PermissionNode> cached = permissionNodes;
+        if (cached != null) return cached;
+        synchronized (permissionLock) {
+            if (permissionNodes != null) return permissionNodes;
+            fetchPermissionNodes();
+            return permissionNodes;
         }
     }
 
@@ -475,11 +510,11 @@ public class Claim {
      * @param target Nullable. The target of the action, such as block material, item material, or entity type.
      */
     public Optional<PermissionNode> findPermissionNode(String permission, @Nullable String target) {
-        if(permissionNodes==null) fetchPermissionNodes();
+        List<PermissionNode> nodes = getPermissionNodes();
         PermissionTargetType targetType = PermissionRegistry.getPermission(permission)
                 .map(PermissionRegistry.RegisteredPermission::targetType)
                 .orElse(PermissionTargetType.NONE);
-        return permissionNodes.stream()
+        return nodes.stream()
                 .filter(node->node.getPermissionPriority(permission)>=0)
                 .filter(node->node.getTargetPriority(targetType, target)>=0)
                 // Permission-name specificity is compared before material specificity.

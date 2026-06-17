@@ -9,6 +9,9 @@ public final class ClaimNameValidator {
     public static final String CONFIG_PATH = "claim.name-regex";
     private static final String DEFAULT_REGEX = "[A-Za-z0-9_-]{1,64}";
 
+    private static volatile Pattern cachedPattern;
+    private static volatile String cachedRegex;
+
     private ClaimNameValidator() {
     }
 
@@ -24,13 +27,21 @@ public final class ClaimNameValidator {
     }
 
     public static void validateConfig() {
+        cachedPattern = null;
         getPattern();
     }
 
     private static Pattern getPattern() {
         String regex = getRegex();
+        Pattern cached = cachedPattern;
+        if (cached != null && regex.equals(cachedRegex)) {
+            return cached;
+        }
         try {
-            return Pattern.compile(regex);
+            Pattern compiled = Pattern.compile(regex);
+            cachedPattern = compiled;
+            cachedRegex = regex;
+            return compiled;
         } catch (PatternSyntaxException e) {
             throw new IllegalArgumentException("Invalid " + CONFIG_PATH + ": " + e.getMessage(), e);
         }

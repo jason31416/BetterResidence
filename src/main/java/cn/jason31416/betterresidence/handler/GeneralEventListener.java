@@ -1,6 +1,7 @@
 package cn.jason31416.betterresidence.handler;
 
 import cn.jason31416.betterresidence.BetterResidence;
+import cn.jason31416.betterresidence.core.AdminModeManager;
 import cn.jason31416.betterresidence.core.Claim;
 import cn.jason31416.betterresidence.core.ClaimManager;
 import cn.jason31416.betterresidence.core.FlagRegistry;
@@ -53,6 +54,7 @@ public class GeneralEventListener implements Listener {
         SelectionManager.clearSelection(event.getPlayer());
         ClaimVisualDisplayManager.clear(event.getPlayer());
         AreaBoxVisualizerManager.remove(event.getPlayer());
+        AdminModeManager.onPlayerQuit(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

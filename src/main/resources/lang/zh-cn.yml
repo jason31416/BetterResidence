@@ -218,8 +218,6 @@ command:
   info-message:
     - "<dark_gray>======== <highlight>%claim% <muted>- 领地信息 <dark_gray>========"
     - "<muted>所有者: <highlight>%owner%"
-    - "<muted>父级路径: <highlight>%parent%"
-    - "<muted>子领地: <highlight>%subclaim-count% <muted>个 <dark_gray>| <content>%subclaims%"
     - "<muted>你的权限组: <highlight>%group%"
     - "<muted>权限组: <hover:show_text:'%groups%'><highlight>%group-count% <muted>个</hover> <muted>| 成员: <hover:show_text:'%members%'><highlight>%member-count%</hover>"
     - "<hover:show_text:'输入信任玩家命令'><click:suggest_command:/res trust ><content>[添加玩家]</click></hover> <hover:show_text:'输入权限设置命令'><click:suggest_command:/res set ><content>[设置权限]</click></hover>"

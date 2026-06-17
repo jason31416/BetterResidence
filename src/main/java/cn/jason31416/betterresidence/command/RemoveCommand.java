@@ -8,15 +8,15 @@ import cn.jason31416.planetlib.command.IParentCommand;
 import cn.jason31416.planetlib.message.Message;
 import cn.jason31416.planetlib.util.Lang;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class RemoveCommand extends ChildCommand {
     private static final long CONFIRM_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(30);
-    private static final Map<UUID, PendingRemoval> PENDING_REMOVALS = new HashMap<>();
+    private static final Map<UUID, PendingRemoval> PENDING_REMOVALS = new ConcurrentHashMap<>();
 
     public RemoveCommand(IParentCommand parent) {
         super("remove", parent);

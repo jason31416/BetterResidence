@@ -426,14 +426,17 @@ public class ClaimManager {
     }
 
     public static void copyClaimFlags(String fromClaimUuid, String toClaimUuid) {
+        List<cn.jason31416.planetlib.data.statement.SQLStatement> statements = new ArrayList<>();
         DataHandler.getDatabase().select("claim_flags")
                 .keyEquals("claim_uuid", fromClaimUuid)
                 .list()
-                .forEach(row -> DataHandler.getDatabase().insert("claim_flags")
+                .forEach(row -> statements.add(DataHandler.getDatabase().insert("claim_flags")
                         .value("flag", row.getString("flag"))
                         .value("value", row.getString("value"))
-                        .value("claim_uuid", toClaimUuid)
-                        .executeUpdate());
+                        .value("claim_uuid", toClaimUuid)));
+        if (!statements.isEmpty()) {
+            DataHandler.getDatabase().executeBatch(statements);
+        }
     }
 
     public static List<ClaimMemberInfo> fetchClaimMembers(String claimUuid) {

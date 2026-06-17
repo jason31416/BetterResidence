@@ -9,13 +9,13 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class SelectionManager {
-    private static final Map<UUID, Selection> SELECTIONS = new HashMap<>();
+    private static final Map<UUID, Selection> SELECTIONS = new ConcurrentHashMap<>();
 
     private SelectionManager() {
     }

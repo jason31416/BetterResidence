@@ -5,12 +5,12 @@ import org.bukkit.Color;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AreaBoxVisualizerManager {
-    private static final Map<UUID, AreaBoxVisualizer> VISUALIZERS = new HashMap<>();
+    private static final Map<UUID, AreaBoxVisualizer> VISUALIZERS = new ConcurrentHashMap<>();
 
     private AreaBoxVisualizerManager() {
     }

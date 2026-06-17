@@ -30,4 +30,8 @@ public class AdminModeManager {
         disabledAdminModePlayers.add(uuid);
         return false;
     }
+
+    public static void onPlayerQuit(Player player) {
+        disabledAdminModePlayers.remove(player.getUniqueId());
+    }
 }

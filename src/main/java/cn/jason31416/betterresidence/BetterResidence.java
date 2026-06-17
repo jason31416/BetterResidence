@@ -50,6 +50,7 @@ public final class BetterResidence extends JavaPlugin {
             launched = true;
         } catch (Exception e) {
             PluginLogger.error("Found illegal config: " + e.getMessage());
+            e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
         }
 

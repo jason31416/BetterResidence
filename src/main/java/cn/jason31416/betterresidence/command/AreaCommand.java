@@ -15,17 +15,17 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class AreaCommand extends ChildCommand {
     private static final long CONFIRM_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(30);
-    private static final Map<UUID, PendingAreaRemoval> PENDING_REMOVALS = new HashMap<>();
+    private static final Map<UUID, PendingAreaRemoval> PENDING_REMOVALS = new ConcurrentHashMap<>();
 
     public AreaCommand(IParentCommand parent) {
         super("area", parent);

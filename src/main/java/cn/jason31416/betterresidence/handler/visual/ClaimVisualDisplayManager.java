@@ -9,15 +9,15 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ClaimVisualDisplayManager {
-    private static final Map<UUID, PlayerDisplayState> STATES = new HashMap<>();
+    private static final Map<UUID, PlayerDisplayState> STATES = new ConcurrentHashMap<>();
 
     private ClaimVisualDisplayManager() {
     }

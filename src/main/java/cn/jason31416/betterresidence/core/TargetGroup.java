@@ -9,11 +9,13 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Named group of permission targets for one {@link PermissionTargetType}.
@@ -25,7 +27,6 @@ public final class TargetGroup {
     @Getter
     private static final Map<PermissionTargetType, Map<String, TargetGroup>> targetGroups = new ConcurrentHashMap<>();
 
-    @Getter
     private final PermissionTargetType targetType;
     @Getter
     private final String id;
@@ -33,6 +34,7 @@ public final class TargetGroup {
     @Getter
     private final int priority;
     private final List<String> patterns;
+    private final List<Pattern> compiledPatterns;
 
     /**
      * Create a target group.
@@ -49,6 +51,11 @@ public final class TargetGroup {
         this.name = name;
         this.priority = priority;
         this.patterns = patterns;
+        List<Pattern> compiled = new ArrayList<>(patterns.size());
+        for (String pattern : patterns) {
+            compiled.add(Pattern.compile(pattern.toLowerCase(), Pattern.CASE_INSENSITIVE));
+        }
+        this.compiledPatterns = List.copyOf(compiled);
     }
 
     /**
@@ -63,8 +70,9 @@ public final class TargetGroup {
      * @return Whether the target matches any configured pattern.
      */
     public boolean isInGroup(String target) {
-        for (String pattern : patterns) {
-            if (target.toLowerCase().matches(pattern.toLowerCase())) {
+        String lowerTarget = target.toLowerCase();
+        for (Pattern pattern : compiledPatterns) {
+            if (pattern.matcher(lowerTarget).matches()) {
                 return true;
             }
         }

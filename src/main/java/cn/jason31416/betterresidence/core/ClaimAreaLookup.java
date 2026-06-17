@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public final class ClaimAreaLookup {
     private static final int CHUNK_SIZE = 16;
-    private static final int MAX_CACHE_ENTRIES = 1024;
-    private static final long CACHE_TTL_MILLIS = TimeUnit.MINUTES.toMillis(1);
+    private static final int MAX_CACHE_ENTRIES = 4096;
+    private static final long CACHE_TTL_MILLIS = TimeUnit.MINUTES.toMillis(2);
     private static final Cache<ChunkKey, List<CachedArea>> cache = CacheBuilder.newBuilder()
             .maximumSize(MAX_CACHE_ENTRIES)
             .expireAfterAccess(CACHE_TTL_MILLIS, TimeUnit.MILLISECONDS)

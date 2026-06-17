@@ -441,7 +441,7 @@ public class ProtectionEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPistonRetract(BlockPistonRetractEvent event) {
         for (Block block : event.getBlocks()) {
-            if (shouldBlockPistonMove(SimpleLocation.of(block), SimpleLocation.of(block.getRelative(event.getDirection().getOppositeFace())))) {
+            if (shouldBlockPistonMove(SimpleLocation.of(block), SimpleLocation.of(block.getRelative(event.getDirection())))) {
                 event.setCancelled(true);
                 return;
             }

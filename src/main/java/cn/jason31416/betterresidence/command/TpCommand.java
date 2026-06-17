@@ -16,18 +16,18 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class TpCommand extends ChildCommand {
     static final String TELEPORT_LOCATION_FLAG = "teleport-location";
     private static final String TELEPORT_PERMISSION = "teleport";
-    private static final Map<UUID, PendingTeleport> PENDING_TELEPORTS = new HashMap<>();
+    private static final Map<UUID, PendingTeleport> PENDING_TELEPORTS = new ConcurrentHashMap<>();
 
     public TpCommand(IParentCommand parent) {
         super("tp", parent);
